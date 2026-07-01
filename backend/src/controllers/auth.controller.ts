@@ -132,7 +132,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email } = req.body;
+    const email = (req.body.email || '').toString().toLowerCase().trim();
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found.' });
@@ -150,7 +150,8 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
 export const verifyForgotOtp = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, otp } = req.body;
+    const email = (req.body.email || '').toString().toLowerCase().trim();
+    const { otp } = req.body;
     const valid = await verifyOTP(email, otp);
 
     if (!valid) {
@@ -165,7 +166,8 @@ export const verifyForgotOtp = async (req: Request, res: Response, next: NextFun
 
 export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password } = req.body;
+    const email = (req.body.email || '').toString().toLowerCase().trim();
+    const { password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found.' });

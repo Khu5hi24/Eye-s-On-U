@@ -19,8 +19,8 @@ export const authService = {
   verifyOtp: (payload: { email: string; otp: string }) => api.post('/auth/verify-otp', payload),
   resendOtp: (payload: { email: string }) => api.post('/auth/resend-otp', payload),
   forgotPassword: (payload: { email: string }) => api.post('/auth/forgot-password', payload),
-  resetPassword: (token: string, payload: { password: string; confirmPassword: string }) =>
-    api.post(`/auth/reset-password/${token}`, payload),
+  verifyForgotOtp: (payload: { email: string; otp: string }) => api.post('/auth/verify-forgot-otp', payload),
+  resetPassword: (payload: { email: string; password: string }) => api.post('/auth/reset-password', payload),
   verifyEmail: (token: string) => api.get(`/auth/verify-email/${token}`),
   getProfile: () => api.get('/user/profile'),
   logout: () => api.post('/auth/logout'),

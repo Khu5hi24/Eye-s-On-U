@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -47,6 +48,12 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <InputField label="Email address" id="email" type="email" autoComplete="email" error={errors.email} {...register('email')} />
         <PasswordField label="Password" id="password" autoComplete="current-password" error={errors.password} {...register('password')} />
+
+        <div className="text-right">
+          <Link href="/forgot-password" className="text-sm font-semibold text-primary hover:underline">
+            Forgot password?
+          </Link>
+        </div>
 
         {/* Role selection removed from signin; role will be detected from the server */}
 

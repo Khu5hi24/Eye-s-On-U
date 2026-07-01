@@ -3,14 +3,19 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const smtpHost = process.env.SMTP_HOST;
+const smtpHost = process.env.SMTP_HOST?.trim();
 const smtpPort = Number(process.env.SMTP_PORT || 587);
-const smtpMail = process.env.SMTP_MAIL;
-const smtpPassword = process.env.SMTP_PASSWORD;
+const smtpMail = process.env.SMTP_MAIL?.trim();
+const smtpPassword = process.env.SMTP_PASSWORD?.trim();
 
 export const getTransport = async () => {
-  if (!smtpHost || !smtpMail || !smtpPassword) {
-    throw new Error('SMTP credentials are not fully configured in .env');
+  const missing = [];
+  if (!smtpHost) missing.push('SMTP_HOST');
+  if (!smtpMail) missing.push('SMTP_MAIL');
+  if (!smtpPassword) missing.push('SMTP_PASSWORD');
+
+  if (missing.length > 0) {
+    throw new Error(`SMTP credentials are not fully configured in .env. Missing: ${missing.join(', ')}`);
   }
 
   return nodemailer.createTransport({

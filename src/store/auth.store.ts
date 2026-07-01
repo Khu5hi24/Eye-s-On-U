@@ -29,7 +29,8 @@ interface AuthState {
   verifyOtp: (email: string, otp: string) => Promise<boolean>;
   resendOtp: (email: string) => Promise<boolean>;
   forgotPassword: (email: string) => Promise<boolean>;
-  resetPassword: (token: string, password: string, confirmPassword: string) => Promise<boolean>;
+  verifyForgotOtp: (email: string, otp: string) => Promise<boolean>;
+  resetPassword: (email: string, password: string, confirmPassword: string) => Promise<boolean>;
   verifyEmail: (token: string) => Promise<boolean>;
   resendVerification: (email: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -214,11 +215,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  resetPassword: async (token, password, confirmPassword) => {
+  verifyForgotOtp: async (email, otp) => {
     set({ loading: true, error: undefined });
 
     try {
-      await authService.resetPassword(token, { password, confirmPassword });
+      await authService.verifyForgotOtp({ email, otp });
+      return true;
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Unable to verify OTP. Please try again.');
+      set({ error: message });
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  resetPassword: async (email, password, confirmPassword) => {
+    set({ loading: true, error: undefined });
+
+    try {
+      await authService.resetPassword({ email, password });
       return true;
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'Unable to reset password. Please try again.');
