@@ -59,7 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main
           className={cn(
             'flex-1 p-4 sm:p-6 md:p-8 transition-all duration-300 overflow-x-hidden min-h-[calc(100vh-4rem)]',
-            sidebarCollapsed ? 'md:pl-20' : 'md:pl-64'
+            sidebarCollapsed ? 'md:pl-20' : 'md:pl-56'
           )}
         >
           <div className="max-w-7xl mx-auto space-y-6">{children}</div>

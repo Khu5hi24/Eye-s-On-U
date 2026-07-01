@@ -11,14 +11,15 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { formatDate } from '../utils';
 import { cn } from '../utils';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription, 
-  DialogFooter 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
 } from './ui/dialog';
+import { TeamMemberModal } from './TeamMemberModal';
 
 // 1. Reusable Status Badge Component
 export const StatusBadge: React.FC<{ status: Task['status'] }> = ({ status }) => {
@@ -79,15 +80,16 @@ interface TaskTableProps {
   onEdit?: (task: Task) => void;
 }
 
-export const TaskTable: React.FC<TaskTableProps> = ({ 
-  tasks, 
-  limit, 
-  onEdit 
+export const TaskTable: React.FC<TaskTableProps> = ({
+  tasks,
+  limit,
+  onEdit
 }) => {
   const { deleteTask } = useTaskStore();
   const { teamMembers } = useTeamStore();
   const user = useAuthStore((state) => state.user);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const isAdmin = user?.role === 'admin';
 
   // Filter limit if specified
@@ -109,7 +111,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
     <>
       <div className="w-full overflow-x-auto rounded-xl border border-border/60 bg-card">
         <table className="w-full border-collapse text-left text-sm text-foreground">
-          
+
           <thead className="bg-secondary/40 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40">
             <tr>
               <th scope="col" className="px-6 py-4">Task Name</th>
@@ -120,7 +122,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
               <th scope="col" className="px-6 py-4 text-right">Actions</th>
             </tr>
           </thead>
-          
+
           <tbody className="divide-y divide-border/30">
             {displayedTasks.length === 0 ? (
               <tr>
@@ -135,10 +137,10 @@ export const TaskTable: React.FC<TaskTableProps> = ({
             ) : (
               displayedTasks.map((task) => {
                 const assignee = getMemberDetails(task.assignedTo);
-                
+
                 return (
                   <tr key={task.id} className="hover:bg-secondary/20 transition-colors group">
-                    
+
                     {/* Task Title */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
@@ -150,35 +152,39 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                         </span>
                       </div>
                     </td>
-                    
+
                     {/* Assignee */}
                     <td className="px-6 py-4">
                       {assignee ? (
-                        <Link href={`/team/${assignee.id}`} className="flex items-center gap-2 group/member hover:underline">
-                          <img 
-                            src={assignee.avatar} 
-                            alt={assignee.name} 
+                        <button
+                          type="button"
+                          onClick={() => setSelectedMember(assignee)}
+                          className="flex items-center gap-2 group/member hover:underline"
+                        >
+                          <img
+                            src={assignee.avatar}
+                            alt={assignee.name}
                             className="h-6 w-6 rounded-full object-cover border border-border"
                           />
                           <span className="font-medium text-xs text-foreground group-hover/member:text-primary">
                             {assignee.name}
                           </span>
-                        </Link>
+                        </button>
                       ) : (
                         <span className="text-xs text-muted-foreground italic">Unassigned</span>
                       )}
                     </td>
-                    
+
                     {/* Priority */}
                     <td className="px-6 py-4">
                       <PriorityBadge priority={task.priority} />
                     </td>
-                    
+
                     {/* Status */}
                     <td className="px-6 py-4">
                       <StatusBadge status={task.status} />
                     </td>
-                    
+
                     {/* Due Date */}
                     <td className="px-6 py-4 text-xs font-semibold text-muted-foreground">
                       <div className="flex items-center gap-1.5">
@@ -186,7 +192,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                         <span>{formatDate(task.dueDate)}</span>
                       </div>
                     </td>
-                    
+
                     {/* Actions */}
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -196,9 +202,9 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                           </Button>
                         </Link>
                         {isAdmin && onEdit && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/80"
                             onClick={() => onEdit(task)}
                           >
@@ -206,9 +212,9 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                           </Button>
                         )}
                         {isAdmin && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => setDeleteId(task.id)}
                           >
@@ -217,13 +223,13 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                         )}
                       </div>
                     </td>
-                    
+
                   </tr>
                 );
               })
             )}
           </tbody>
-          
+
         </table>
       </div>
 
@@ -245,6 +251,14 @@ export const TaskTable: React.FC<TaskTableProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {selectedMember && (
+        <TeamMemberModal
+          open={Boolean(selectedMember)}
+          onClose={() => setSelectedMember(null)}
+          member={selectedMember}
+        />
+      )}
     </>
   );
 };

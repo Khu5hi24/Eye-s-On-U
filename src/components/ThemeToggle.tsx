@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import { Monitor, Moon, Sun, Timer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const preferences = ['light', 'dark', 'system', 'auto'] as const;
+const preferences = ['light', 'dark', 'auto'] as const;
 
 const getAutoTheme = () => {
   const hour = new Date().getHours();
@@ -15,13 +15,15 @@ const getAutoTheme = () => {
 export const ThemeToggle: React.FC = () => {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [preference, setPreference] = useState<(typeof preferences)[number]>('system');
+  const [preference, setPreference] = useState<(typeof preferences)[number]>('auto');
 
   useEffect(() => {
     const saved = localStorage.getItem('eyesonu_theme_preference') as (typeof preferences)[number] | null;
-    setPreference(saved && preferences.includes(saved) ? saved : 'system');
+    const next = saved && preferences.includes(saved) ? saved : 'auto';
+    setPreference(next);
+    setTheme(next === 'auto' ? getAutoTheme() : next);
     setMounted(true);
-  }, []);
+  }, [setTheme]);
 
   if (!mounted) return <div className="h-9 w-9 rounded-lg bg-secondary/30 border border-border/40 animate-pulse" />;
 
@@ -34,7 +36,7 @@ export const ThemeToggle: React.FC = () => {
     setTheme(next === 'auto' ? getAutoTheme() : next);
   };
 
-  const Icon = preference === 'system' ? Monitor : preference === 'auto' ? Timer : isDark ? Moon : Sun;
+  const Icon = preference === 'auto' ? Timer : isDark ? Moon : Sun;
 
   return (
     <button

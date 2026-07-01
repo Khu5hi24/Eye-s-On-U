@@ -27,7 +27,7 @@ export const InputField = React.forwardRef<HTMLInputElement, FieldProps>(
           id={id}
           ref={ref}
           className={cn(
-            'w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary/30',
+            'w-full rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm text-foreground shadow-[0_10px_30px_-20px_rgba(15,23,42,0.4)] transition focus:outline-none focus:ring-2 focus:ring-primary/30',
             errorMessage && 'border-destructive focus:ring-destructive/30',
             className
           )}
@@ -62,7 +62,7 @@ export const PasswordField = React.forwardRef<HTMLInputElement, FieldProps>(
           ref={ref}
           type={showPassword ? 'text' : 'password'}
           className={cn(
-            'w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary/30',
+            'w-full rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm text-foreground shadow-[0_10px_30px_-20px_rgba(15,23,42,0.4)] transition focus:outline-none focus:ring-2 focus:ring-primary/30',
             errorMessage && 'border-destructive focus:ring-destructive/30',
             className
           )}
@@ -89,7 +89,7 @@ export const FileInputField = React.forwardRef<HTMLInputElement, FieldProps>(
           type="file"
           accept="image/svg+xml,image/jpeg,image/png"
           className={cn(
-            'w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground shadow-sm transition file:cursor-pointer file:border-0 file:bg-secondary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-foreground file:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30',
+            'w-full rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm text-foreground shadow-[0_10px_30px_-20px_rgba(15,23,42,0.4)] transition file:cursor-pointer file:border-0 file:bg-secondary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-foreground file:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30',
             errorMessage && 'border-destructive focus:ring-destructive/30',
             className
           )}
@@ -119,7 +119,7 @@ export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>
           id={id}
           ref={ref}
           className={cn(
-            'w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary/30',
+            'w-full rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm text-foreground shadow-[0_10px_30px_-20px_rgba(15,23,42,0.4)] transition focus:outline-none focus:ring-2 focus:ring-primary/30',
             errorMessage && 'border-destructive focus:ring-destructive/30',
             className
           )}

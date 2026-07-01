@@ -28,7 +28,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [status, setStatus] = useState<TaskStatus>(initialData?.status || 'pending');
   const [priority, setPriority] = useState<TaskPriority>(initialData?.priority || 'medium');
   const [assignedTo, setAssignedTo] = useState(initialData?.assignedTo || '');
-  
+
   // Default due date to today
   const [dueDate, setDueDate] = useState(
     initialData?.dueDate || new Date().toISOString().split('T')[0]
@@ -38,7 +38,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !assignedTo) return;
-    
+
     onSubmit({
       title: title.trim(),
       description: description.trim(),
@@ -57,7 +57,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto p-6 bg-card border border-border/60 rounded-2xl glass shadow-md">
-      
+
       {/* Title */}
       <div className="space-y-1.5">
         <label htmlFor="task-title" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -90,7 +90,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
+
         {/* Status */}
         <div className="space-y-1.5">
           <label htmlFor="task-status" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -163,7 +163,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               <span className="font-medium text-foreground">{dueDate}</span>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </button>
-            
+
             {showDatePicker && (
               <div className="absolute right-0 md:left-0 z-50 mt-2 shadow-2xl animate-fade-in">
                 <div className="fixed inset-0 z-40" onClick={() => setShowDatePicker(false)} />

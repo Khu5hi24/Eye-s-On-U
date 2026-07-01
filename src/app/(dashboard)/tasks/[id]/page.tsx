@@ -1,33 +1,31 @@
 'use client';
 
-import React, { use, useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTaskStore } from '@/store/taskStore';
 import { useTeamStore } from '@/store/teamStore';
 import { StatusBadge, PriorityBadge } from '@/components/TaskTable';
 import { Button } from '@/components/ui/button';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  User, 
-  Paperclip, 
-  History, 
-  Clock, 
-  Edit3, 
+import {
+  ArrowLeft,
+  Calendar,
+  User,
+  Paperclip,
+  History,
+  Clock,
+  Edit3,
   Trash2,
   AlertCircle
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { CalendarPicker } from '@/components/ui/CalendarPicker';
 import { cn, formatDate } from '@/utils';
-import { TaskStatus, TaskPriority } from '@/types';
+import { TaskStatus, TaskPriority, TeamMember } from '@/types';
+import { TeamMemberModal } from '@/components/TeamMemberModal';
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function TaskDetailPage({ params }: PageProps) {
+export default function TaskDetailPage(props: any) {
+  const { params } = props as { params: Promise<{ id: string }> };
   const router = useRouter();
   const { id } = use(params);
 
@@ -37,6 +35,7 @@ export default function TaskDetailPage({ params }: PageProps) {
   const [mounted, setMounted] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
   // Edit form states
   const [editTitle, setEditTitle] = useState('');
@@ -128,7 +127,7 @@ export default function TaskDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6">
-      
+
       {/* Back button & Action buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Link href="/tasks" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-semibold transition-colors">
@@ -148,19 +147,19 @@ export default function TaskDetailPage({ params }: PageProps) {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
+
         {/* Left Col: Task Main Details */}
         <div className="xl:col-span-2 space-y-6">
           <Card className="glass">
             <CardContent className="p-6 sm:p-8 space-y-6">
-              
+
               <div className="flex flex-wrap items-center gap-3">
                 <StatusBadge status={task.status} />
                 <PriorityBadge priority={task.priority} />
                 <span className={cn(
                   "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border",
-                  deadlineInfo.isOverdue 
-                    ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" 
+                  deadlineInfo.isOverdue
+                    ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
                     : "bg-secondary text-muted-foreground border-border/40"
                 )}>
                   <Clock className="h-3.5 w-3.5" />
@@ -192,8 +191,8 @@ export default function TaskDetailPage({ params }: PageProps) {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {mockAttachments.map((file, idx) => (
-                    <div 
-                      key={idx} 
+                    <div
+                      key={idx}
                       className="p-3 border border-border bg-secondary/20 hover:bg-secondary/40 transition-colors rounded-xl flex items-center justify-between cursor-pointer group"
                       onClick={() => alert(`Opening mockup download for: ${file.name}`)}
                     >
@@ -222,7 +221,7 @@ export default function TaskDetailPage({ params }: PageProps) {
                 <History className="h-4 w-4" />
                 Task Activity Timeline ({taskLogs.length})
               </h3>
-              
+
               <div className="relative border-l border-border pl-6 ml-3 space-y-6">
                 {taskLogs.length === 0 ? (
                   <div className="text-xs text-muted-foreground italic py-2 pl-2">
@@ -259,20 +258,24 @@ export default function TaskDetailPage({ params }: PageProps) {
 
         {/* Right Col: Assignee details & Info cards */}
         <div className="space-y-6">
-          
+
           {/* Assignee Card */}
           <Card className="glass">
             <CardContent className="p-6 space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40 pb-2.5">
                 Assignee
               </h3>
-              
+
               {assignee ? (
-                <Link href={`/team/${assignee.id}`} className="flex items-center gap-3.5 group hover:bg-secondary/20 p-2 rounded-xl transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setSelectedMember(assignee)}
+                  className="flex items-center gap-3.5 group hover:bg-secondary/20 p-2 rounded-xl transition-colors"
+                >
                   <div className="relative">
-                    <img 
-                      src={assignee.avatar} 
-                      alt={assignee.name} 
+                    <img
+                      src={assignee.avatar}
+                      alt={assignee.name}
                       className="h-12 w-12 rounded-full object-cover border border-border"
                     />
                     <span className={cn(
@@ -291,7 +294,7 @@ export default function TaskDetailPage({ params }: PageProps) {
                       {assignee.status}
                     </span>
                   </div>
-                </Link>
+                </button>
               ) : (
                 <div className="flex items-center gap-3 p-4 border border-dashed border-border rounded-xl">
                   <User className="h-6 w-6 text-muted-foreground stroke-1" />
@@ -307,7 +310,7 @@ export default function TaskDetailPage({ params }: PageProps) {
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40 pb-2.5">
                 Schedule Details
               </h3>
-              
+
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-foreground font-semibold uppercase tracking-wider text-[10px]">Due Date</span>
@@ -339,9 +342,9 @@ export default function TaskDetailPage({ params }: PageProps) {
             <DialogTitle>Edit Task Details</DialogTitle>
             <DialogDescription>Change information relating to this task.</DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
-            
+
             {/* Title */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-foreground">Title</label>

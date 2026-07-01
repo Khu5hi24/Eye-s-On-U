@@ -6,6 +6,7 @@ import { useTeamStore } from '../../../store/teamStore';
 import { Card, CardContent, CardHeader, CardTitle } from '../card';
 import { Users, ArrowRight, CheckCircle2, FolderKanban } from 'lucide-react';
 import { cn } from '../../../utils';
+import type { TeamMember } from '../../../types';
 
 export const TeamMembersPanel: React.FC = () => {
   const { teamMembers } = useTeamStore();
@@ -32,9 +33,8 @@ export const TeamMembersPanel: React.FC = () => {
           <Link
             key={member.id}
             href={`/team/${member.id}`}
-            className="group flex items-center gap-3 p-2.5 rounded-xl hover:bg-secondary/40 transition-all duration-200"
+            className="group flex w-full items-center gap-3 p-2.5 rounded-xl text-left hover:bg-secondary/40 transition-all duration-200"
           >
-            {/* Avatar with status indicator */}
             <div className="relative">
               <img
                 src={member.avatar}
@@ -51,7 +51,6 @@ export const TeamMembersPanel: React.FC = () => {
               />
             </div>
 
-            {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
@@ -61,7 +60,6 @@ export const TeamMembersPanel: React.FC = () => {
               </div>
               <p className="text-[11px] text-muted-foreground truncate">{member.role}</p>
 
-              {/* Stats row */}
               <div className="flex items-center gap-3 mt-1.5">
                 <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
                   <CheckCircle2 className="h-3 w-3 text-emerald-500" />

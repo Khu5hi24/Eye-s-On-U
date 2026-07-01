@@ -56,7 +56,7 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
   const [isViewProfileOpen, setIsViewProfileOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [editName, setEditName] = useState(profile.name);
-  const [editSpecialization, setEditSpecialization] = useState(profile.specialization || profile.bio || '');
+  const [editSpecialization, setEditSpecialization] = useState(profile.specialization || '');
   const [editBio, setEditBio] = useState(profile.bio || '');
   const [editAvatar, setEditAvatar] = useState(profile.avatar);
 
@@ -67,7 +67,7 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
     await updateProfile({
       name: editName,
       specialization: editSpecialization,
-      bio: editBio || editSpecialization,
+      bio: editBio,
       avatar: editAvatar,
     });
     setIsEditProfileOpen(false);
@@ -84,35 +84,41 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border/60 glass flex items-center justify-between px-4 sm:px-6">
-        
-        {/* Left Section: Logo & Toggle Button */}
+      <nav className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center justify-between border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl sm:px-6">
         <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden" 
-            onClick={onMenuClick}
-            aria-label="Open sidebar"
-          >
+          <Button variant="ghost" size="icon" className="rounded-full md:hidden" onClick={onMenuClick} aria-label="Open sidebar">
             <Menu className="h-5 w-5" />
           </Button>
 
-          <Link href="/dashboard" className="flex items-center gap-2 group">
-            <div className="h-9 w-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+          <Link href="/dashboard" className="group flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-105">
               <Sparkles className="h-5 w-5 animate-pulse-soft" />
             </div>
-            <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-liner-to-r from-foreground via-foreground/90 to-foreground/75">
-              Eye&apos;s On U
-            </span>
-            <span className="text-[10px] uppercase tracking-wider font-semibold border border-primary/20 px-1.5 py-0.5 rounded bg-primary/5 text-primary scale-90 hidden sm:inline-block">
-              {profile.role}
-            </span>
+            <div className="flex flex-col">
+              <span className="bg-linear-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-lg font-semibold tracking-tight text-transparent">
+                Eye&apos;s On U
+              </span>
+              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground sm:block">
+                {profile.role}
+              </span>
+            </div>
           </Link>
         </div>
 
-        {/* Right Section: Notification, Theme, Profile */}
+        <div className="hidden items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3 py-2 shadow-sm md:flex">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Sparkles className="h-3.5 w-3.5" />
+          </div>
+          <span className="text-sm font-medium text-muted-foreground">Focus on what matters</span>
+        </div>
+
         <div className="flex items-center gap-2 sm:gap-3">
+          <Link href="/tasks/new">
+            <Button variant="outline" className="hidden h-9 rounded-full px-3 text-sm sm:flex">
+              <span className="mr-2 text-base">+</span>
+              Quick add
+            </Button>
+          </Link>
           <ThemeToggle />
           {/* Notifications Dropdown */}
           <DropdownMenu>
@@ -222,7 +228,7 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
               <DropdownMenuItem 
                 onClick={() => {
                   setEditName(profile.name);
-                  setEditSpecialization(profile.specialization || profile.bio || '');
+                  setEditSpecialization(profile.specialization || '');
                   setEditBio(profile.bio || '');
                   setEditAvatar(profile.avatar);
                   setIsEditProfileOpen(true);
@@ -263,11 +269,18 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
             <div className="text-center space-y-1">
               <h2 className="text-xl font-bold text-foreground">{profile.name}</h2>
               <p className="text-sm text-muted-foreground">{profile.email}</p>
-              <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary uppercase tracking-wider">
-                {profile.role}
-              </span>
-              {(profile.specialization || profile.bio) && (
-                <p className="mt-3 text-sm text-muted-foreground">{profile.specialization || profile.bio}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2 justify-center">
+                <span className="inline-flex px-3 py-1 rounded-full text-[10px] font-semibold bg-primary/10 text-primary uppercase tracking-[0.24em]">
+                  {profile.role}
+                </span>
+                {profile.specialization && (
+                  <span className="inline-flex px-3 py-1 rounded-full text-[10px] font-semibold bg-secondary/15 text-foreground uppercase tracking-[0.24em]">
+                    {profile.specialization}
+                  </span>
+                )}
+              </div>
+              {profile.bio && (
+                <p className="mt-3 text-sm text-muted-foreground max-w-[24rem]">{profile.bio}</p>
               )}
             </div>
           </div>

@@ -13,7 +13,7 @@ dotenv.config();
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     const normalizedEmail = (email || '').toString().toLowerCase().trim();
     const file = (req as any).file || (req as any).files?.profilePicture?.[0] || (req as any).files?.avatar?.[0];
 
@@ -36,14 +36,18 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       }
     }
 
+    const allowedRoles = ['admin', 'employee', 'user'] as const;
+    const normalizedRole: 'admin' | 'employee' | 'user' =
+      typeof role === 'string' && (allowedRoles as readonly string[]).includes(role) ? (role as 'admin' | 'employee' | 'user') : 'employee';
+
     const user = await User.create({
       name,
       email: normalizedEmail,
       password: hashedPassword,
       avatar,
-      role: 'employee',
+      role: normalizedRole,
       isVerified: false,
-    });
+    } as any);
 
     const otp = generateOTP();
     await saveOTP(normalizedEmail, otp);
@@ -82,9 +86,8 @@ export const verifyOtp = async (req: Request, res: Response, next: NextFunction)
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
     const normalizedEmail = (email || '').toString().toLowerCase().trim();
-    const normalizedRole = (role || '').toString().toLowerCase().trim();
 
     console.log('[auth.controller] login request body', req.body);
 
@@ -113,14 +116,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return res.status(403).json(responsePayload);
     }
 
-    const roleMatches = !!normalizedRole && !!user.role && user.role.toLowerCase() === normalizedRole;
-    console.log('[auth.controller] role match result', roleMatches);
-
-    if (!roleMatches) {
-      const responsePayload = { success: false, message: 'Role mismatch' };
-      console.log('[auth.controller] login response', responsePayload);
-      return res.status(403).json(responsePayload);
-    }
+    // Role is determined from the user document in the database; no role required from request
 
     const accessToken = generateAccessToken({ id: user._id, email: user.email, role: user.role });
     const refreshToken = generateRefreshToken({ id: user._id });
@@ -197,6 +193,14 @@ export const resendOtp = async (req: Request, res: Response, next: NextFunction)
     await sendOTPEmail(email, otp, 'Resend OTP', 'Your new OTP code');
 
     res.status(200).json({ success: true, message: 'OTP resent successfully.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logout = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.status(200).json({ success: true, message: 'Logged out successfully.' });
   } catch (error) {
     next(error);
   }

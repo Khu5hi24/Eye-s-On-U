@@ -139,44 +139,39 @@ export const TasksList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      
-      {/* View Tabs */}
-      <div className="flex border-b border-border/40 pb-px">
-        <button
-          onClick={() => setActiveTab('table')}
-          className={cn(
-            "px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer",
-            activeTab === 'table'
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          )}
-        >
-          Table View
-        </button>
-        <button
-          onClick={() => setActiveTab('board')}
-          className={cn(
-            "px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-1.5",
-            activeTab === 'board'
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Kanban className="h-3.5 w-3.5" />
-          Priority Board (Drag & Drop)
-        </button>
+      <div className="rounded-[28px] border border-border/60 bg-card/80 p-4 shadow-[0_24px_60px_-35px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">Operations</p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Task workspace</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('table')}
+              className={cn('rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] transition-all', activeTab === 'table' ? 'border-primary bg-primary text-primary-foreground shadow-sm' : 'border-border/60 bg-background/70 text-muted-foreground hover:text-foreground')}
+            >
+              Table
+            </button>
+            <button
+              onClick={() => setActiveTab('board')}
+              className={cn('flex items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.25em] transition-all', activeTab === 'board' ? 'border-primary bg-primary text-primary-foreground shadow-sm' : 'border-border/60 bg-background/70 text-muted-foreground hover:text-foreground')}
+            >
+              <Kanban className="h-3.5 w-3.5" />
+              Board
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Filters Bar */}
-      <div className="flex flex-col md:flex-row gap-3">
+      <div className="flex flex-col gap-3 rounded-[24px] border border-border/60 bg-card/70 p-3 shadow-sm backdrop-blur-xl md:flex-row md:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search tasks..."
             value={searchInput}
             onChange={handleSearch}
-            className="w-full h-10 pl-9 pr-4 border border-border rounded-lg bg-card text-sm focus:outline-hidden focus:ring-2 focus:ring-ring transition-all"
+            className="h-10 w-full rounded-2xl border border-border/60 bg-background/70 pl-9 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 
@@ -184,7 +179,7 @@ export const TasksList: React.FC = () => {
           <select
             value={filters.status || 'all'}
             onChange={(e) => setFilters({ status: e.target.value as TaskStatus | 'all' })}
-            className="h-10 px-3 border border-border rounded-lg bg-card text-sm focus:outline-hidden focus:ring-2 focus:ring-ring cursor-pointer"
+            className="h-10 cursor-pointer rounded-2xl border border-border/60 bg-background/70 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             {statusOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -194,38 +189,24 @@ export const TasksList: React.FC = () => {
           <select
             value={filters.priority || 'all'}
             onChange={(e) => setFilters({ priority: e.target.value as TaskPriority | 'all' })}
-            className="h-10 px-3 border border-border rounded-lg bg-card text-sm focus:outline-hidden focus:ring-2 focus:ring-ring cursor-pointer"
+            className="h-10 cursor-pointer rounded-2xl border border-border/60 bg-background/70 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             {priorityOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
 
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleSort('dueDate')}
-            className={cn(
-              'h-10 w-10',
-              filters.sortBy === 'dueDate' && 'bg-secondary'
-            )}
-            title="Sort by due date"
-          >
+          <Button variant="outline" size="icon" onClick={() => handleSort('dueDate')} className={cn('h-10 w-10 rounded-2xl', filters.sortBy === 'dueDate' && 'bg-secondary')} title="Sort by due date">
             <ArrowUpDown className="h-4 w-4" />
           </Button>
 
-          <Button
-            variant="outline"
-            onClick={handleCSVExport}
-            className="h-10 flex items-center gap-1.5 text-xs font-semibold px-3"
-            title="Export tasks to CSV"
-          >
+          <Button variant="outline" onClick={handleCSVExport} className="flex h-10 items-center gap-1.5 rounded-2xl px-3 text-xs font-semibold" title="Export tasks to CSV">
             <FileDown className="h-4 w-4" />
             <span>Export CSV</span>
           </Button>
 
           {(filters.status || filters.priority || filters.searchQuery || filters.sortBy) && (
-            <Button variant="ghost" size="sm" onClick={resetFilters} className="h-10 text-xs font-bold uppercase tracking-wider text-rose-500 hover:bg-rose-500/10">
+            <Button variant="ghost" size="sm" onClick={resetFilters} className="h-10 rounded-2xl text-xs font-bold uppercase tracking-wider text-rose-500 hover:bg-rose-500/10">
               Reset Filters
             </Button>
           )}
@@ -257,7 +238,7 @@ export const TasksList: React.FC = () => {
       {/* Main View Display */}
       {activeTab === 'table' ? (
         <div className="space-y-4">
-          <div className="text-xs text-muted-foreground font-medium">
+          <div className="rounded-full border border-border/60 bg-background/70 px-3 py-2 text-xs font-medium text-muted-foreground">
             Showing {filteredTasks.length} of {tasks.length} tasks
           </div>
 
@@ -266,7 +247,7 @@ export const TasksList: React.FC = () => {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4 border-t border-border/30">
+            <div className="flex items-center justify-between border-t border-border/30 pt-4">
               <span className="text-xs text-muted-foreground">
                 Page <span className="font-bold text-foreground">{currentPage}</span> of <span className="font-bold text-foreground">{totalPages}</span>
               </span>
@@ -304,7 +285,7 @@ export const TasksList: React.FC = () => {
       <Dialog open={editingTask !== null} onOpenChange={(open) => !open && setEditingTask(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Task Details</DialogTitle>
+            <DialogTitle className="text-xl">Edit Task Details</DialogTitle>
             <DialogDescription>Update task fields below to keep team members aligned.</DialogDescription>
           </DialogHeader>
           

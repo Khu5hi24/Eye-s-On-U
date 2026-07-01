@@ -13,7 +13,7 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
   const { heatmapData, currentStreak, longestStreak, totalCompleted } = useMemo(() => {
     // Filter completed tasks
     const completedTasks = tasks.filter(t => t.status === 'completed' && t.updatedAt);
-    
+
     // Total completed
     const totalCompleted = completedTasks.length;
 
@@ -27,7 +27,7 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
     // Generate last 63 days (9 weeks of 7 days) to fill a perfect grid
     const today = new Date();
     const days: { dateStr: string; date: Date; count: number }[] = [];
-    
+
     // We want the grid to end on "today" and go back 62 days
     for (let i = 62; i >= 0; i--) {
       const d = new Date(today);
@@ -138,32 +138,32 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
         </div>
 
         <div className="grid grid-cols-2 gap-4 my-6">
-          <div className="bg-secondary/30 dark:bg-slate-800/30 rounded-xl p-4 border border-border/40 text-center relative overflow-hidden group">
-            <div className="absolute top-2 right-2 text-orange-500 opacity-20 group-hover:scale-110 transition-transform">
-              <Flame className="h-10 w-10 fill-orange-500" />
+          <div className="bg-secondary/30 dark:bg-slate-800/30 rounded-xl p-5 pr-12 border border-border/40 text-center relative overflow-hidden">
+            <div className="absolute top-3 right-3 text-orange-400 opacity-70 pointer-events-none">
+              <Flame className="h-8 w-8" />
             </div>
-            <p className="text-xs text-muted-foreground font-medium">Current Streak</p>
-            <h4 className="text-3xl font-black text-foreground mt-1 flex items-center justify-center gap-1">
+            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Current Streak</p>
+            <h4 className="text-4xl font-extrabold text-foreground mt-3 flex items-center justify-center gap-2">
               <span>{currentStreak}</span>
-              <span className="text-sm text-orange-500 font-bold">days</span>
+              <span className="text-sm text-orange-500 font-semibold">days</span>
             </h4>
           </div>
 
-          <div className="bg-secondary/30 dark:bg-slate-800/30 rounded-xl p-4 border border-border/40 text-center relative overflow-hidden group">
-            <div className="absolute top-2 right-2 text-yellow-500 opacity-20 group-hover:scale-110 transition-transform">
-              <Award className="h-10 w-10 fill-yellow-500" />
+          <div className="bg-secondary/30 dark:bg-slate-800/30 rounded-xl p-5 pr-12 border border-border/40 text-center relative overflow-hidden">
+            <div className="absolute top-3 right-3 text-yellow-400 opacity-70 pointer-events-none">
+              <Award className="h-8 w-8" />
             </div>
-            <p className="text-xs text-muted-foreground font-medium">Longest Streak</p>
-            <h4 className="text-3xl font-black text-foreground mt-1 flex items-center justify-center gap-1">
+            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Longest Streak</p>
+            <h4 className="text-4xl font-extrabold text-foreground mt-3 flex items-center justify-center gap-2">
               <span>{longestStreak}</span>
-              <span className="text-sm text-yellow-500 font-bold">days</span>
+              <span className="text-sm text-yellow-500 font-semibold">days</span>
             </h4>
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs border-t border-border/40 pt-4">
+        <div className="flex items-center justify-between text-sm border-t border-border/40 pt-4">
           <span className="text-muted-foreground font-medium">Total Completed:</span>
-          <span className="font-bold text-foreground bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md">
+          <span className="font-bold text-foreground bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-lg">
             {totalCompleted} Tasks
           </span>
         </div>

@@ -7,8 +7,6 @@ import { authService } from '../services/auth.service';
 interface LoginPayload {
   email: string;
   password: string;
-  role: 'admin' | 'employee';
-  adminSecretCode?: string;
 }
 
 interface SignupPayload {
@@ -17,7 +15,6 @@ interface SignupPayload {
   role: 'admin' | 'employee';
   password: string;
   confirmPassword: string;
-  adminSecretCode?: string;
   profilePicture?: FileList;
 }
 
@@ -91,7 +88,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           role: profile.role,
           avatar: profile.avatar || profile.profilePicture || defaultAvatar,
           bio: profile.bio || '',
-          specialization: profile.bio || '',
+          specialization: profile.specialization || '',
         },
         isAuthenticated: true,
       });
@@ -138,15 +135,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         console.log('[auth.store] refreshToken saved to localStorage');
       }
 
-      set({
-        user: {
-          name: payload.email,
-          email: payload.email,
-          role: payload.role,
-          avatar: defaultAvatar,
-        },
-        isAuthenticated: true,
-      });
+      // Fetch profile to obtain role and other details from server
+      try {
+        const profileResp = await authService.getProfile();
+        const profile = profileResp.data.data;
+        set({
+          user: {
+            name: profile.name,
+            email: profile.email,
+            role: profile.role,
+            avatar: profile.avatar || defaultAvatar,
+            bio: profile.bio || '',
+            specialization: profile.specialization || '',
+          },
+          isAuthenticated: true,
+        });
+      } catch (profileErr) {
+        // If fetching profile fails, still mark authenticated but with minimal info
+        set({
+          user: { name: payload.email, email: payload.email, role: 'user', avatar: defaultAvatar },
+          isAuthenticated: true,
+        });
+      }
 
       console.log('[auth.store] login success redirect pending');
       return true;
@@ -170,9 +180,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       formData.append('password', payload.password);
       formData.append('confirmPassword', payload.confirmPassword);
 
-      if (payload.adminSecretCode) {
-        formData.append('adminSecretCode', payload.adminSecretCode);
-      }
+      // specialization removed from signup payload
+
+      // adminSecretCode removed from signup flow
 
       if (payload.profilePicture?.length) {
         formData.append('profilePicture', payload.profilePicture[0]);
@@ -284,6 +294,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       await authService.logout();
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       set({ user: null, isAuthenticated: false });
     } catch (error) {
       set({ error: 'Unable to logout. Please try again.' });
@@ -296,38 +308,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true, error: undefined });
 
     try {
-      if (profile.name) {
-        const response = await authService.updateProfile({
-          name: profile.name,
-          bio: profile.bio || profile.specialization,
-          specialization: profile.specialization,
-        });
-        const user = response.data.data;
-        set((state) => ({
-          user: state.user
-            ? {
-                ...state.user,
-                name: user.name,
-                avatar: profile.avatar || user.avatar || state.user.avatar,
-                bio: user.bio || state.user.bio,
-                specialization: user.bio || state.user.specialization,
-                role: state.user.role,
-                email: state.user.email,
-              }
-            : {
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                avatar: user.avatar || user.profilePicture || defaultAvatar,
-                bio: user.bio || '',
-                specialization: user.bio || '',
-              },
-        }));
-      } else {
-        set((state) => ({
-          user: state.user ? { ...state.user, ...profile } : state.user,
-        }));
-      }
+      const payload: Record<string, unknown> = {};
+      if (typeof profile.name === 'string') payload.name = profile.name;
+      if (typeof profile.bio === 'string') payload.bio = profile.bio;
+      if (typeof profile.specialization === 'string') payload.specialization = profile.specialization;
+
+      const response = await authService.updateProfile(payload);
+      const user = response.data.data;
+      set((state) => ({
+        user: state.user
+          ? {
+              ...state.user,
+              name: user.name,
+              avatar: profile.avatar || user.avatar || state.user.avatar,
+              bio: user.bio || state.user.bio,
+              specialization: user.specialization || state.user.specialization,
+              role: state.user.role,
+              email: state.user.email,
+            }
+          : {
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              avatar: user.avatar || user.profilePicture || defaultAvatar,
+              bio: user.bio || '',
+              specialization: user.specialization || '',
+            },
+      }));
     } catch (err) {
       set({ error: 'Unable to update profile. Please try again.' });
     } finally {

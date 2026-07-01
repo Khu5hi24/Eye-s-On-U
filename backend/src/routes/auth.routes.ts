@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { upload as uploadMiddleware } from '../middlewares/upload.middleware';
-import { register, verifyOtp, login, forgotPassword, verifyForgotOtp, resetPassword, resendOtp } from '../controllers/auth.controller';
+import { register, verifyOtp, login, forgotPassword, verifyForgotOtp, resetPassword, resendOtp, logout } from '../controllers/auth.controller';
 
 const router = Router();
 
@@ -12,5 +12,6 @@ router.post('/forgot-password', forgotPassword);
 router.post('/verify-forgot-otp', verifyForgotOtp);
 router.post('/reset-password', resetPassword);
 router.post('/resend-otp', resendOtp);
+router.post('/logout', logout);
 
 export default router;

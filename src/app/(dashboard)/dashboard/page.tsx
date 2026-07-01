@@ -18,7 +18,7 @@ import { TeamMembersPanel } from '@/components/ui/dashboard/TeamMembersPanel';
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
-  const { tasks, loading, error } = useTaskStore();
+  const { tasks, teamMembers, loading, error } = useTaskStore();
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
@@ -33,12 +33,12 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-background to-background p-6 shadow-sm">
+      <div className="rounded-3xl border border-border/60 bg-slate-950/90 p-6 shadow-sm dark:bg-slate-100/90">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-primary">Welcome back</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">{user.name}</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">Here’s your team pulse for today, with priorities, progress, and the essentials in one place.</p>
+            <p className="text-sm font-medium uppercase tracking-[0.24em] text-slate-300 dark:text-slate-700">Welcome</p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white dark:text-slate-950">{user.name}</h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300/80 dark:text-slate-700/80">Here’s your team pulse for today, with priorities, progress, and the essentials in one place.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             {isAdmin && (
@@ -84,59 +84,12 @@ export default function DashboardPage() {
 
       <DashboardCharts />
 
-      <div className="grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
-        <Card className="border-border/60 bg-card/80">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">Task Summary</CardTitle>
-              <p className="text-sm text-muted-foreground">A quick view of your active work.</p>
-            </div>
-            <div className="rounded-full bg-primary/10 p-2 text-primary">
-              <BriefcaseBusiness className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
-                <p className="text-2xl font-semibold text-foreground">{tasks.length}</p>
-                <p className="text-sm text-muted-foreground">Total tasks</p>
-              </div>
-              <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
-                <p className="text-2xl font-semibold text-foreground">{tasks.filter((task) => task.status === 'in-progress').length}</p>
-                <p className="text-sm text-muted-foreground">In progress</p>
-              </div>
-              <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
-                <p className="text-2xl font-semibold text-foreground">{tasks.filter((task) => task.status === 'completed').length}</p>
-                <p className="text-sm text-muted-foreground">Completed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/60 bg-card/80">
-          <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <Link href="/tasks">
-              <Button variant="outline" className="w-full justify-start">Open task board</Button>
-            </Link>
-            {isAdmin && (
-              <Link href="/analytics">
-                <Button variant="outline" className="w-full justify-start">View analytics</Button>
-              </Link>
-            )}
-            <Link href="/profile">
-              <Button variant="outline" className="w-full justify-start">Update profile</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Task Summary and Quick Actions removed per request */}
 
       <ProductivityHeatmap tasks={personalTasks} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+        <div className="space-y-6">
           <RecentTasks />
         </div>
         <div>

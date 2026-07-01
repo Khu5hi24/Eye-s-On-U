@@ -62,7 +62,7 @@ export const PriorityBoard: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
+    <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 xl:grid-cols-4">
       {priorities.map((priority) => {
         const laneTasks = tasksByPriority(priority);
         const header = columnHeaders[priority];
@@ -72,7 +72,7 @@ export const PriorityBoard: React.FC = () => {
             key={priority}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, priority)}
-            className="flex flex-col rounded-2xl border border-border/40 bg-card/60 glass min-h-[500px] transition-all"
+            className="glass flex min-h-125 flex-col rounded-3xl border border-border/60 transition-all"
           >
             {/* Header */}
             <div className={cn(
@@ -80,27 +80,27 @@ export const PriorityBoard: React.FC = () => {
               header.color
             )}>
               <span>{header.label}</span>
-              <span className="text-[11px] bg-background/80 px-2 py-0.5 rounded-full font-bold">
+              <span className="rounded-full bg-background/80 px-2 py-0.5 text-[11px] font-bold">
                 {laneTasks.length}
               </span>
             </div>
 
             {/* Cards Lane */}
-            <div className="p-3 space-y-3 flex-1 overflow-y-auto">
+            <div className="flex-1 space-y-3 overflow-y-auto p-3">
               {laneTasks.length === 0 ? (
-                <div className="h-32 border-2 border-dashed border-border/40 rounded-xl flex items-center justify-center text-xs text-muted-foreground italic text-center p-4">
+                <div className="flex h-32 items-center justify-center rounded-[20px] border-2 border-dashed border-border/40 p-4 text-center text-xs italic text-muted-foreground">
                   Drag cards here to set priority to {priority}
                 </div>
               ) : (
                 laneTasks.map((task) => {
                   const avatar = getMemberAvatar(task.assignedTo);
-                  
+
                   return (
                     <div
                       key={task.id}
                       draggable={isAdmin}
                       onDragStart={(e) => handleDragStart(e, task.id)}
-                      className="p-4 border border-border bg-card hover:border-primary/30 dark:hover:border-primary/40 rounded-xl shadow-xs hover:shadow-md cursor-grab active:cursor-grabbing transition-all group animate-fade-in"
+                      className="group cursor-grab rounded-[20px] border border-border/70 bg-card/80 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md active:cursor-grabbing"
                     >
                       <div className="flex flex-col gap-3">
                         {/* Title */}
@@ -123,7 +123,7 @@ export const PriorityBoard: React.FC = () => {
                               <Calendar className="h-3 w-3" />
                               {task.dueDate.split('-').slice(1).join('/')}
                             </span>
-                            
+
                             {/* Assignee Avatar */}
                             {avatar ? (
                               <img

@@ -18,16 +18,12 @@ const signupSchema = z
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string().min(8, 'Password must be at least 8 characters'),
     role: z.enum(['employee', 'admin']),
-    adminSecretCode: z.string().optional(),
+    // adminSecretCode removed per request
     profilePicture: z.any().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
-  })
-  .refine((data) => data.role !== 'admin' || !data.adminSecretCode || data.adminSecretCode.trim().length > 0, {
-    message: 'Admin secret code is required for admin signup',
-    path: ['adminSecretCode'],
   });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -42,16 +38,11 @@ export default function SignupPage() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
-    defaultValues: {
-      role: 'employee',
-      adminSecretCode: '',
-    },
+    defaultValues: {},
   });
 
-  const role = watch('role');
 
   const onSubmit = async (data: SignupFormValues) => {
     const success = await signup({
@@ -60,19 +51,14 @@ export default function SignupPage() {
       role: data.role,
       password: data.password,
       confirmPassword: data.confirmPassword,
-      adminSecretCode: data.adminSecretCode,
       profilePicture: data.profilePicture,
-    });
+    } as any);
 
     if (success) {
       showToast('Account created. Please verify your email.', 'success');
       sessionStorage.setItem('pendingEmail', data.email.toLowerCase());
       router.push('/verify-otp');
     }
-  };
-
-  const handleRoleChange = (value: 'employee' | 'admin') => {
-    setSelectedRole(value);
   };
 
   return (
@@ -83,20 +69,12 @@ export default function SignupPage() {
         <PasswordField label="Password" id="password" autoComplete="new-password" error={errors.password} {...register('password')} />
         <PasswordField label="Confirm password" id="confirmPassword" autoComplete="new-password" error={errors.confirmPassword} {...register('confirmPassword')} />
 
-        <SelectField label="Select role" id="role" error={errors.role} {...register('role', { onChange: (e) => handleRoleChange(e.target.value as 'employee' | 'admin') })}>
+        <SelectField label="Select role" id="role" error={errors.role} {...register('role', { onChange: (e) => setSelectedRole(e.target.value as 'employee' | 'admin') })}>
           <option value="employee">Employee</option>
           <option value="admin">Admin</option>
         </SelectField>
 
-        {selectedRole === 'admin' && (
-          <InputField
-            label="Admin secret code"
-            id="adminSecretCode"
-            placeholder="Enter the admin secret"
-            error={errors.adminSecretCode}
-            {...register('adminSecretCode')}
-          />
-        )}
+        {/* Admin secret removed: admins can register without a secret code */}
 
         <FileInputField label="Profile picture (optional)" id="profilePicture" error={errors.profilePicture} {...register('profilePicture')} />
 

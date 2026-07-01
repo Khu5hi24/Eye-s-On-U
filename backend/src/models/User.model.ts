@@ -10,6 +10,7 @@ const userSchema = new Schema<IUserModel>(
     password: { type: String, required: true },
     avatar: { type: String, default: '' },
     bio: { type: String, default: '' },
+    specialization: { type: String, default: '' },
     role: { type: String, default: 'employee', enum: ['admin', 'employee', 'user'] },
     isVerified: { type: Boolean, default: false },
   },

@@ -8,6 +8,7 @@ export interface IUser {
   password: string;
   avatar: string;
   bio?: string;
+  specialization?: string;
   role: UserRole;
   isVerified: boolean;
 }

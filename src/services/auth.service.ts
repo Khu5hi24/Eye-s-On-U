@@ -2,7 +2,7 @@ import api from '../lib/axios';
 
 
 export const authService = {
-  login: (payload: { email: string; password: string; role: string; adminSecretCode?: string }) => {
+  login: (payload: { email: string; password: string }) => {
     console.log('[auth.service] login request payload', payload);
 
     return api.post('/auth/login', payload)

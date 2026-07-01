@@ -24,29 +24,29 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Analytics</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Review trends, capacity, and delivery health.</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">Analytics</h1>
+          <p className="mt-1 text-sm text-muted-foreground max-w-2xl">Review trends, capacity, delivery health, and team performance from the latest data.</p>
         </div>
-        <div className="rounded-full bg-primary/10 p-2 text-primary">
-          <TrendingUp className="h-4 w-4" />
+        <div className="inline-flex items-center justify-center rounded-full bg-primary/10 p-3 text-primary">
+          <TrendingUp className="h-5 w-5" />
         </div>
       </div>
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-        <Card className="border-border/60 bg-card/80">
+      <div className="grid gap-6">
+        <Card className="border-border/60 bg-card/80 h-full">
           <CardHeader>
             <CardTitle className="text-lg">Performance overview</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="h-full min-h-[28rem]">
             <DashboardCharts />
           </CardContent>
         </Card>
-        <Card className="border-border/60 bg-card/80">
+        <Card className="border-border/60 bg-card/80 h-full">
           <CardHeader>
             <CardTitle className="text-lg">Insights</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="h-full min-h-[28rem]">
             <DashboardInsights />
           </CardContent>
         </Card>

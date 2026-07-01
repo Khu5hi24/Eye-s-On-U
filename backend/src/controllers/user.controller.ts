@@ -26,7 +26,8 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
     }
 
     user.name = name || user.name;
-    user.bio = bio || specialization || user.bio;
+    user.bio = bio ?? user.bio;
+    user.specialization = specialization ?? user.specialization;
     await user.save();
 
     res.status(200).json({ success: true, data: user });
@@ -37,7 +38,7 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
 
 export const getTeamMembers = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const users = await User.find({}).select('name email role avatar bio createdAt').sort({ name: 1 });
+    const users = await User.find({}).select('name email role avatar bio specialization createdAt').sort({ name: 1 });
     const tasks = await Task.find({}).select('assignedTo status');
 
     const data = users.map((user) => {
