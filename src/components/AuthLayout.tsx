@@ -50,7 +50,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
             <Sparkles className="h-5 w-5" />
           </div>
-          <span className="bg-linear-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-xl font-semibold tracking-[0.2em] text-transparent">
+          <span className="text-white text-xl font-semibold tracking-[0.2em]">
             Eye&apos;s on U
           </span>
         </div>
@@ -107,7 +107,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
           <div className="overflow-hidden rounded-[28px] border border-border/60 bg-card/80 shadow-[0_24px_60px_-35px_rgba(15,23,42,0.4)] backdrop-blur-xl">
             <div className="space-y-6 p-6 sm:p-8">
               <div className="space-y-2 text-center">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground lg:hidden">Eye&apos;s on U</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-foreground">Eye&apos;s on U</p>
                 <h1 className="bg-linear-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-3xl font-semibold tracking-tight text-transparent">
                   {title}
                 </h1>

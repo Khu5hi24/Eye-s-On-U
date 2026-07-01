@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
+import { isValidEmail } from '../utils/validateEmail';
 import User from '../models/User.model';
 import OTP from '../models/OTP.model';
 import { hashPassword, comparePassword } from '../utils/hashPassword';
@@ -11,6 +12,8 @@ import { generateAccessToken, generateRefreshToken } from '../utils/generateToke
 
 dotenv.config();
 
+const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, email, password, role } = req.body;
@@ -19,6 +22,10 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Name, email and password are required.' });
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
     }
 
     const existingUser = await User.findOne({ email: normalizedEmail });
@@ -88,6 +95,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const { email, password } = req.body;
     const normalizedEmail = (email || '').toString().toLowerCase().trim();
+
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+    }
 
     console.log('[auth.controller] login request body', req.body);
 

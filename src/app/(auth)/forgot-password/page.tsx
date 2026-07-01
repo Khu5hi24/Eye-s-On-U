@@ -5,19 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { isValidEmail } from '@/utils/validateEmail';
 import { AuthLayout } from '@/components/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { InputField, PasswordField } from '@/components/ui/form';
 import { useAuth } from '@/hooks/useAuth';
 import { useToastStore } from '@/store/toastStore';
 
-const emailRegex = /^[a-z0-9]+(?:[._%+-][a-z0-9]+)*@(?!\d)[a-z][a-z0-9-]*(?:\.[a-z]{2,})+$/;
-
 const emailFormSchema = z.object({
   email: z
     .string()
     .min(1, 'Enter your email')
-    .refine((value) => emailRegex.test(value.trim()), 'Enter a valid email with a valid domain and no numbers immediately after @')
+    .refine((value) => isValidEmail(value), 'Enter a valid email address')
     .transform((value) => value.trim()),
 });
 

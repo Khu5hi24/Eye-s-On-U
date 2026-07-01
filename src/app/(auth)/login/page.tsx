@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { isValidEmail } from '@/utils/validateEmail';
 import { useRouter } from 'next/navigation';
 import { AuthLayout } from '@/components/AuthLayout';
 import { Button } from '@/components/ui/button';
@@ -12,9 +13,11 @@ import { InputField, PasswordField, SelectField } from '@/components/ui/form';
 import { useAuth } from '@/hooks/useAuth';
 import { useToastStore } from '@/store/toastStore';
 
+const emailRegex = /^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@(?!\d)[A-Za-z][A-Za-z0-9-]*(?:\.[A-Za-z]{2,})+$/;
+
 const loginSchema = z
   .object({
-    email: z.string().email('Please enter a valid email address'),
+    email: z.string().trim().min(1, 'Email is required').refine((v) => isValidEmail(v), 'Please enter a valid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
   });
 

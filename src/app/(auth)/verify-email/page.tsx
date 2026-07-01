@@ -6,6 +6,7 @@ import { AuthLayout } from '@/components/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useToastStore } from '@/store/toastStore';
+import { isValidEmail } from '@/utils/validateEmail';
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -44,6 +45,11 @@ function VerifyEmailContent() {
 
     if (!resendEmail) {
       setResendError('Please enter the email address you used to sign up.');
+      return;
+    }
+
+    if (!isValidEmail(resendEmail)) {
+      setResendError('Please enter a valid email address.');
       return;
     }
 
