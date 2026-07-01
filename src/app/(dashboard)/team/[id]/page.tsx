@@ -6,12 +6,32 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useTaskStore } from '@/store/taskStore';
 import { useTeamStore } from '@/store/teamStore';
+import { dashboardService } from '@/services/dashboard.service';
+import { useToastStore } from '@/store/toastStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge, PriorityBadge } from '@/components/TaskTable';
 import { formatDate, cn } from '@/utils';
 import { ArrowLeft, Award, Calendar, FolderKanban, Mail, Users } from 'lucide-react';
 import type { TeamMember, Task } from '@/types';
+
+const specializationOptions = [
+  'Frontend Developer',
+  'Backend Developer',
+  'Full Stack Developer',
+  'Mobile Developer',
+  'DevOps Engineer',
+  'QA Engineer',
+  'Software Architect',
+  'Systems Engineer',
+  'Data Engineer',
+  'UI/UX Developer',
+  'Security Engineer',
+  'Cloud Engineer',
+  'Product Engineer',
+  'Machine Learning Engineer',
+  'Technical Lead',
+];
 
 export default function TeamMemberDetailPage(props: any) {
   const { params } = props as { params: Promise<{ id: string }> };
@@ -22,6 +42,8 @@ export default function TeamMemberDetailPage(props: any) {
   const { tasks, updateTask } = useTaskStore();
   const [mounted, setMounted] = useState(false);
   const [memberRole, setMemberRole] = useState('employee');
+  const [memberSpecialization, setMemberSpecialization] = useState('');
+  const { showToast } = useToastStore();
 
   useEffect(() => {
     setMounted(true);
@@ -39,6 +61,7 @@ export default function TeamMemberDetailPage(props: any) {
   useEffect(() => {
     if (member) {
       setMemberRole(member.role);
+      setMemberSpecialization(member.specialization || '');
     }
   }, [member]);
 
@@ -67,9 +90,19 @@ export default function TeamMemberDetailPage(props: any) {
     await updateTask(taskId, { [field]: value } as Partial<Task>);
   };
 
-  const handleSaveRole = () => {
-    if (member && isAdmin) {
-      updateMember(member.id, { role: memberRole });
+  const handleSaveRole = async () => {
+    if (!member || !isAdmin) return;
+
+    try {
+      await dashboardService.updateTeamMember(member.id, {
+        role: memberRole,
+        specialization: memberSpecialization,
+      });
+      updateMember(member.id, { role: memberRole, specialization: memberSpecialization });
+      showToast('Member updated successfully.', 'success');
+    } catch (error) {
+      const message = (error as any)?.response?.data?.message || 'Unable to update member.';
+      showToast(message, 'error');
     }
   };
 
@@ -116,9 +149,16 @@ export default function TeamMemberDetailPage(props: any) {
               <div className="space-y-1">
                 <h2 className="text-2xl font-semibold text-foreground">{member.name}</h2>
                 <p className="text-sm text-muted-foreground">{member.email || `${member.name.toLowerCase().replace(/\s+/g, '.')}@eyesonu.com`}</p>
-                <span className="inline-flex rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-foreground">
-                  {member.role}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-foreground">
+                    {member.role}
+                  </span>
+                  {member.specialization ? (
+                    <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+                      {member.specialization}
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -163,6 +203,21 @@ export default function TeamMemberDetailPage(props: any) {
                   >
                     <option value="employee">Employee</option>
                     <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  <label className="block text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Role specialization</label>
+                  <select
+                    value={memberSpecialization}
+                    onChange={(event) => setMemberSpecialization(event.target.value)}
+                    className="w-full h-11 px-4 border border-border rounded-xl bg-secondary/30 text-sm"
+                  >
+                    <option value="">Select specialization</option>
+                    {specializationOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <Button variant="default" onClick={handleSaveRole} className="w-full h-11">

@@ -7,4 +7,5 @@ export const dashboardService = {
   deleteTask: (id: string) => api.delete(`/tasks/${id}`),
   updateTaskStatus: (id: string, status: string) => api.patch(`/tasks/${id}/status`, { status }),
   getTeamMembers: () => api.get('/user/team'),
+  updateTeamMember: (id: string, payload: { role?: string; specialization?: string }) => api.put(`/user/member/${id}`, payload),
 };

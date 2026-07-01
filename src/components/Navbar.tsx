@@ -59,17 +59,21 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
   const [editSpecialization, setEditSpecialization] = useState(profile.specialization || '');
   const [editBio, setEditBio] = useState(profile.bio || '');
   const [editAvatar, setEditAvatar] = useState(profile.avatar);
+  const isAdmin = profile.role === 'admin';
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateProfile({
+    const payload: Record<string, string> = {
       name: editName,
-      specialization: editSpecialization,
       bio: editBio,
       avatar: editAvatar,
-    });
+    };
+    if (isAdmin) {
+      payload.specialization = editSpecialization;
+    }
+    await updateProfile(payload);
     setIsEditProfileOpen(false);
   };
 
@@ -334,16 +338,18 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
               />
             </div>
 
-            <div className="space-y-1">
-              <label htmlFor="profile-specialization" className="text-xs font-bold text-foreground">Role Specialization</label>
-              <input
-                id="profile-specialization"
-                type="text"
-                value={editSpecialization}
-                onChange={(e) => setEditSpecialization(e.target.value)}
-                className="w-full h-10 px-3 border border-border rounded-lg bg-secondary/40 text-sm focus:outline-hidden focus:ring-2 focus:ring-ring"
-              />
-            </div>
+            {isAdmin ? (
+              <div className="space-y-1">
+                <label htmlFor="profile-specialization" className="text-xs font-bold text-foreground">Role Specialization</label>
+                <input
+                  id="profile-specialization"
+                  type="text"
+                  value={editSpecialization}
+                  onChange={(e) => setEditSpecialization(e.target.value)}
+                  className="w-full h-10 px-3 border border-border rounded-lg bg-secondary/40 text-sm focus:outline-hidden focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            ) : null}
 
             <div className="space-y-1">
               <label htmlFor="profile-bio" className="text-xs font-bold text-foreground">Bio</label>
