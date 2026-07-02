@@ -9,6 +9,8 @@ export interface IUser {
   avatar: string;
   bio?: string;
   specialization?: string;
+  phone?: string;
+  gender?: string;
   role: UserRole;
   isVerified: boolean;
 }

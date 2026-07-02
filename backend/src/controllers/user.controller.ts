@@ -19,14 +19,28 @@ export const getProfile = async (req: AuthRequest, res: Response, next: NextFunc
 
 export const updateProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { name, bio, specialization } = req.body;
+    const { name, email, bio, specialization, phone, gender } = req.body;
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
+    if (email && email.toLowerCase() !== user.email) {
+      const emailExists = await User.findOne({ email: email.toLowerCase() });
+      if (emailExists) {
+        return res.status(400).json({ success: false, message: 'Email address is already in use.' });
+      }
+      user.email = email.toLowerCase();
+    }
+
     user.name = name || user.name;
     user.bio = bio ?? user.bio;
+    user.phone = typeof phone === 'string' ? phone : user.phone;
+    user.gender = typeof gender === 'string' ? gender : user.gender;
+
+    if (typeof req.body.avatar !== 'undefined') {
+      user.avatar = req.body.avatar;
+    }
 
     if (typeof specialization !== 'undefined' && req.user?.role === 'admin') {
       user.specialization = specialization;
@@ -75,7 +89,7 @@ export const updateUserById = async (req: AuthRequest, res: Response, next: Next
 
 export const getTeamMembers = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const users = await User.find({}).select('name email role avatar bio specialization createdAt').sort({ name: 1 });
+    const users = await User.find({}).select('name email role avatar bio specialization phone gender createdAt').sort({ name: 1 });
     const tasks = await Task.find({}).select('assignedTo status');
 
     const data = users.map((user) => {
@@ -91,6 +105,8 @@ export const getTeamMembers = async (req: AuthRequest, res: Response, next: Next
         avatar: user.avatar,
         bio: user.bio,
         specialization: user.specialization || '',
+        phone: user.phone || '',
+        gender: user.gender || '',
         tasksAssigned: memberTasks.length,
         completionRate,
         status: 'active',

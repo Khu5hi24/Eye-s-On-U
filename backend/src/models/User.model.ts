@@ -11,6 +11,8 @@ const userSchema = new Schema<IUserModel>(
     avatar: { type: String, default: '' },
     bio: { type: String, default: '' },
     specialization: { type: String, default: '' },
+    phone: { type: String, default: '' },
+    gender: { type: String, default: '' },
     role: { type: String, default: 'employee', enum: ['admin', 'employee', 'user'] },
     isVerified: { type: Boolean, default: false },
   },
