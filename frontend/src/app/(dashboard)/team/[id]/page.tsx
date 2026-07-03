@@ -74,17 +74,7 @@ export default function TeamMemberDetailPage(props: any) {
   const upcomingDeadlines = memberTasks
     .filter((task) => task.status !== 'completed')
     .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
-
-  const mockProjects = Array.from({ length: member?.projects || 0 }, (_, index) => {
-    const names = [
-      'Phoenix Migration Board',
-      'Quantum Analytics API',
-      'Apollo Admin Shell',
-      'Aegis Mobile Client',
-      'Atlas Integration Pipelines',
-    ];
-    return names[index % names.length];
-  });
+  const mockProjects: string[] = [];
 
   const handleTaskUpdate = async (taskId: string, field: 'dueDate' | 'assignedTo', value: string) => {
     await updateTask(taskId, { [field]: value } as Partial<Task>);

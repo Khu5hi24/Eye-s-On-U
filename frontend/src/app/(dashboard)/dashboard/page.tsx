@@ -36,19 +36,11 @@ export default function DashboardPage() {
       <div className="rounded-3xl border border-border/60 bg-slate-950/90 p-6 shadow-sm dark:bg-slate-100/90">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-slate-300 dark:text-slate-700">Welcome</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white dark:text-slate-950">{user.name}</h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-300/80 dark:text-slate-700/80">Here’s your team pulse for today, with priorities, progress, and the essentials in one place.</p>
+            <p className="text-sm font-bold uppercase tracking-[0.24em] text-slate-100 dark:text-slate-900">Welcome</p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-white dark:text-slate-950">{user.name}</h1>
+            <p className="mt-2 max-w-2xl text-sm font-semibold text-slate-200 dark:text-slate-800">Here’s your team pulse for today, with priorities, progress, and the essentials in one place.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            {isAdmin && (
-              <Link href="/tasks/new">
-                <Button className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  New Task
-                </Button>
-              </Link>
-            )}
             <Link href="/team">
               <Button variant="outline" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
@@ -88,13 +80,9 @@ export default function DashboardPage() {
 
       <ProductivityHeatmap tasks={personalTasks} />
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-        <div className="space-y-6">
-          <RecentTasks />
-        </div>
-        <div>
-          <TeamMembersPanel />
-        </div>
+      <div className="space-y-6">
+        <RecentTasks />
+        <TeamMembersPanel />
       </div>
     </div>
   );

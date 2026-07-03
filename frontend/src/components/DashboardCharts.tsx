@@ -86,18 +86,18 @@ export const DashboardCharts: React.FC = () => {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <Card className="overflow-hidden border-border/80">
         <CardHeader className="border-b border-border/40 bg-secondary/20">
-          <CardTitle className="flex items-center justify-between text-xs font-semibold tracking-wide uppercase text-foreground">
+          <CardTitle className="flex items-center justify-between text-xs font-extrabold tracking-wide uppercase text-foreground">
             <span>Weekly Activity</span>
-            <span className="rounded-md bg-accent/10 px-2 py-0.5 text-[9px] font-bold uppercase text-accent">Tasks Flow</span>
+            <span className="rounded-md bg-accent/20 border border-accent/30 px-2 py-0.5 text-[9px] font-extrabold uppercase text-foreground">Tasks Flow</span>
           </CardTitle>
-          <CardDescription className="text-xs">Created, completed, and pending overview</CardDescription>
+          <CardDescription className="text-xs text-foreground/80 font-bold">Created, completed, and pending overview</CardDescription>
         </CardHeader>
         <CardContent className="h-64 p-4">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={weeklyData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="name" stroke="#8a8880" fontSize={10} tickLine={false} />
-              <YAxis stroke="#8a8880" fontSize={10} tickLine={false} />
+              <XAxis dataKey="name" stroke="#475569" fontSize={10} fontWeight="bold" tickLine={false} />
+              <YAxis stroke="#475569" fontSize={10} fontWeight="bold" tickLine={false} />
               <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '6px' }} />
               <Legend verticalAlign="top" height={36} iconSize={8} iconType="circle" wrapperStyle={{ fontSize: 10 }} />
               <Bar dataKey="Created" fill="var(--foreground)" opacity={0.85} radius={[3, 3, 0, 0]} />
@@ -110,11 +110,11 @@ export const DashboardCharts: React.FC = () => {
 
       <Card className="overflow-hidden border-border/80">
         <CardHeader className="border-b border-border/40 bg-secondary/20">
-          <CardTitle className="flex items-center justify-between text-xs font-semibold tracking-wide uppercase text-foreground">
+          <CardTitle className="flex items-center justify-between text-xs font-extrabold tracking-wide uppercase text-foreground">
             <span>Task Distribution</span>
-            <span className="rounded-md bg-accent/10 px-2 py-0.5 text-[9px] font-bold uppercase text-accent">Status Mix</span>
+            <span className="rounded-md bg-accent/20 border border-accent/30 px-2 py-0.5 text-[9px] font-extrabold uppercase text-foreground">Status Mix</span>
           </CardTitle>
-          <CardDescription className="text-xs">Categorized status distribution breakdown</CardDescription>
+          <CardDescription className="text-xs text-foreground/80 font-bold">Categorized status distribution breakdown</CardDescription>
         </CardHeader>
         <CardContent className="flex h-64 flex-col justify-center p-4">
           <div className="relative h-48 w-full">
@@ -134,15 +134,15 @@ export const DashboardCharts: React.FC = () => {
             )}
 
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-bold text-foreground font-heading">{tasks.length}</span>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Total Tasks</span>
+              <span className="text-xl font-extrabold text-foreground font-heading">{tasks.length}</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-foreground">Total Tasks</span>
             </div>
           </div>
 
           <div className="mt-2 grid grid-cols-4 gap-1 text-center">
             {pieData.map((item, idx) => (
               <div key={idx} className="flex flex-col items-center">
-                <span className="text-[9px] font-semibold text-muted-foreground uppercase">{item.name}</span>
+                <span className="text-[9px] font-bold text-foreground uppercase">{item.name}</span>
                 <div className="mt-1 flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
                   <span className="text-xs font-bold text-foreground">{item.value}</span>
@@ -155,11 +155,11 @@ export const DashboardCharts: React.FC = () => {
 
       <Card className="overflow-hidden border-border/80">
         <CardHeader className="border-b border-border/40 bg-secondary/20">
-          <CardTitle className="flex items-center justify-between text-xs font-semibold tracking-wide uppercase text-foreground">
+          <CardTitle className="flex items-center justify-between text-xs font-extrabold tracking-wide uppercase text-foreground">
             <span>Top Active Members</span>
-            <span className="rounded-md bg-accent/10 px-2 py-0.5 text-[9px] font-bold uppercase text-accent">DB Rank</span>
+            <span className="rounded-md bg-accent/20 border border-accent/30 px-2 py-0.5 text-[9px] font-extrabold uppercase text-foreground">DB Rank</span>
           </CardTitle>
-          <CardDescription className="text-xs">Top 5 by completion and assigned tasks</CardDescription>
+          <CardDescription className="text-xs text-foreground/80 font-bold">Top 5 by completion and assigned tasks</CardDescription>
         </CardHeader>
         <CardContent className="h-64 p-4">
           {topMembers.length === 0 ? (
@@ -168,8 +168,8 @@ export const DashboardCharts: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topMembers} margin={{ top: 10, right: 5, left: -25, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="name" stroke="#8a8880" fontSize={10} tickLine={false} />
-                <YAxis stroke="#8a8880" fontSize={10} tickLine={false} />
+                <XAxis dataKey="name" stroke="#475569" fontSize={10} fontWeight="bold" tickLine={false} />
+                <YAxis stroke="#475569" fontSize={10} fontWeight="bold" tickLine={false} />
                 <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '6px' }} />
                 <Legend verticalAlign="top" height={36} iconSize={8} iconType="circle" wrapperStyle={{ fontSize: 10 }} />
                 <Bar dataKey="Completion" fill="#3b6e58" radius={[3, 3, 0, 0]} />

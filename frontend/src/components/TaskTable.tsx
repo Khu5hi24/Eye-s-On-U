@@ -20,7 +20,6 @@ import {
   DialogDescription,
   DialogFooter
 } from './ui/dialog';
-import { TeamMemberModal } from './TeamMemberModal';
 
 // 1. Reusable Status Badge Component
 export const StatusBadge: React.FC<{ status: Task['status'] }> = ({ status }) => {
@@ -91,7 +90,6 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const isAdmin = user?.role === 'admin';
 
   const handleEditClick = (task: Task) => {
@@ -133,21 +131,22 @@ export const TaskTable: React.FC<TaskTableProps> = ({
       <div className="w-full overflow-x-auto rounded-xl border border-border/60 bg-card">
         <table className="w-full border-collapse text-left text-sm text-foreground">
 
-          <thead className="bg-secondary/40 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40">
+          <thead className="bg-secondary/40 text-xs font-extrabold uppercase tracking-wider text-foreground border-b border-border/40">
             <tr>
-              <th scope="col" className="px-6 py-4">Task Name</th>
-              <th scope="col" className="px-6 py-4">Assigned To</th>
-              <th scope="col" className="px-6 py-4">Priority</th>
-              <th scope="col" className="px-6 py-4">Status</th>
-              <th scope="col" className="px-6 py-4">Due Date</th>
-              <th scope="col" className="px-6 py-4 text-right">Actions</th>
+              <th scope="col" className="px-4 py-2.5 w-24">Task ID</th>
+              <th scope="col" className="px-4 py-2.5 w-52">Task Name</th>
+              <th scope="col" className="px-4 py-2.5 w-44">Assigned To</th>
+              <th scope="col" className="px-4 py-2.5 w-28">Priority</th>
+              <th scope="col" className="px-4 py-2.5 w-32">Status</th>
+              <th scope="col" className="px-4 py-2.5 w-32">Due Date</th>
+              <th scope="col" className="px-4 py-2.5 w-24 text-right">Actions</th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-border/30">
             {displayedTasks.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
                   <div className="flex flex-col items-center justify-center space-y-2">
                     <AlertCircle className="h-8 w-8 stroke-1 opacity-50" />
                     <p className="font-semibold text-sm">No tasks found</p>
@@ -162,24 +161,30 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                 return (
                   <tr key={task.id} className="hover:bg-secondary/20 transition-colors group">
 
+                    {/* Task ID */}
+                    <td className="px-4 py-2.5">
+                      <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
+                        {task.id ? `TSK-${task.id.slice(-6).toUpperCase()}` : 'TSK-XXXX'}
+                      </span>
+                    </td>
+
                     {/* Task Title */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2.5">
                       <div className="flex flex-col">
                         <span className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                           {task.title}
                         </span>
-                        <span className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5 max-w-xs">
+                        <span className="text-[11px] text-foreground/75 font-semibold truncate block max-w-[150px] mt-0.5" title={task.description}>
                           {task.description}
                         </span>
                       </div>
                     </td>
 
                     {/* Assignee */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2.5">
                       {assignee ? (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedMember(assignee)}
+                        <Link
+                          href={`/team/${assignee.id}`}
                           className="flex items-center gap-2 group/member hover:underline"
                         >
                           {assignee.avatar ? (
@@ -196,32 +201,32 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                           <span className="font-medium text-xs text-foreground group-hover/member:text-primary">
                             {assignee.name}
                           </span>
-                        </button>
+                        </Link>
                       ) : (
                         <span className="text-xs text-muted-foreground italic">Unassigned</span>
                       )}
                     </td>
 
                     {/* Priority */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2.5">
                       <PriorityBadge priority={task.priority} />
                     </td>
 
                     {/* Status */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2.5">
                       <StatusBadge status={task.status} />
                     </td>
 
                     {/* Due Date */}
-                    <td className="px-6 py-4 text-xs font-semibold text-muted-foreground">
+                    <td className="px-4 py-2.5 text-xs font-bold text-foreground/80">
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" />
+                        <Calendar className="h-3.5 w-3.5 text-blue-500" />
                         <span>{formatDate(task.dueDate)}</span>
                       </div>
                     </td>
 
                     {/* Actions */}
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-2.5 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/tasks/${task.id}`} passHref>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-sky-500 hover:text-sky-600 hover:bg-sky-500/10">
@@ -279,13 +284,6 @@ export const TaskTable: React.FC<TaskTableProps> = ({
         </DialogContent>
       </Dialog>
 
-      {selectedMember && (
-        <TeamMemberModal
-          open={Boolean(selectedMember)}
-          onClose={() => setSelectedMember(null)}
-          member={selectedMember}
-        />
-      )}
     </>
   );
 };

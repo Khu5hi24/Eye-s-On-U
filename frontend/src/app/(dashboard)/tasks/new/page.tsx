@@ -19,9 +19,13 @@ export default function NewTaskPage() {
 
   if (!isAuthenticated || user?.role !== 'admin') return null;
 
-  const handleSubmit = (taskData: any) => {
+  const handleSubmit = async (taskData: any, file?: { name: string; size: string; type: string; base64: string } | null) => {
     // Create task in store (automatically runs side effects)
-    void createTask(taskData);
+    const createdTask = await createTask(taskData);
+    
+    if (createdTask && createdTask.id && file) {
+      localStorage.setItem(`attachments_${createdTask.id}`, JSON.stringify([file]));
+    }
     
     // Redirect to Task list page
     router.push('/tasks');
@@ -32,7 +36,7 @@ export default function NewTaskPage() {
       
       {/* Header */}
       <div className="space-y-1">
-        <Link href="/tasks" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-semibold transition-colors mb-1">
+        <Link href="/tasks" className="inline-flex items-center gap-1.5 text-xs text-foreground/80 hover:text-primary font-bold transition-colors mb-1">
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to Tasks
         </Link>
@@ -40,7 +44,7 @@ export default function NewTaskPage() {
           <Plus className="h-6 w-6 text-primary" />
           Create New Task
         </h1>
-        <p className="text-sm text-muted-foreground">Assign and schedule a new task for your team.</p>
+        <p className="text-sm font-semibold text-foreground/80">Assign and schedule a new task for your team.</p>
       </div>
 
       {/* Reusable Form */}

@@ -13,26 +13,53 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToastStore } from '@/store/toastStore';
 
 const emailFormSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Enter your email')
-    .max(100, 'Email must be at most 100 characters')
-    .refine((value) => isValidEmail(value), 'Enter a valid email address')
-    .transform((value) => value.trim()),
+  email: z.string()
+    .min(1, 'Email is required.')
+    .max(254, 'Email is too long.')
+    .superRefine((v, ctx) => {
+      if (!v || v.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Email is required.',
+        });
+        return;
+      }
+      const trimmed = v.trim();
+      if (/[A-Z]/.test(trimmed)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Email cannot contain uppercase letters.',
+        });
+        return;
+      }
+      if ((trimmed.match(/@/g) || []).length !== 1) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Please enter a valid email address.',
+        });
+        return;
+      }
+      if (!isValidEmail(trimmed)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Please enter a valid email address.',
+        });
+      }
+    }),
 });
 
 const resetFormSchema = z
   .object({
-    otp: z.string().length(6, 'Enter the 6-digit OTP'),
+    otp: z.string().length(6, 'Please enter the 6-digit OTP.'),
     password: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
+      .min(8, 'Please enter a strong password.')
       .max(30, 'Password must be at most 30 characters')
       .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/, 'Password must include uppercase, lowercase, number, and special character'),
-    confirmPassword: z.string().min(8, 'Confirm your password').max(30, 'Confirm password must be at most 30 characters'),
+    confirmPassword: z.string().min(8, 'Please confirm your password.').max(30, 'Confirm password must be at most 30 characters'),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
+    message: 'Passwords do not match.',
     path: ['confirmPassword'],
   });
 
@@ -50,6 +77,7 @@ export default function ForgotPasswordPage() {
     formState: { errors: emailErrors, isSubmitting: isEmailSubmitting },
   } = useForm<EmailFormValues>({
     resolver: zodResolver(emailFormSchema),
+    mode: 'onChange',
   });
 
   const {
@@ -58,6 +86,7 @@ export default function ForgotPasswordPage() {
     formState: { errors: resetErrors, isSubmitting: isResetSubmitting },
   } = useForm<ResetFormValues>({
     resolver: zodResolver(resetFormSchema),
+    mode: 'onChange',
   });
 
   const [backendError, setBackendError] = useState<string | null>(null);
@@ -118,7 +147,7 @@ export default function ForgotPasswordPage() {
       tabActive="login"
     >
       {step === 'email' ? (
-        <form onSubmit={handleSubmitEmail(handleEmailSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmitEmail(handleEmailSubmit)} className="space-y-5" noValidate>
           {backendError ? (
             <div className="rounded-2xl border border-rose-500/60 bg-rose-500/10 p-4 text-sm text-rose-800">
               {backendError}
@@ -130,7 +159,7 @@ export default function ForgotPasswordPage() {
           </Button>
         </form>
       ) : (
-        <form onSubmit={handleSubmitReset(handleResetSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmitReset(handleResetSubmit)} className="space-y-5" noValidate>
           {backendError ? (
             <div className="rounded-2xl border border-rose-500/60 bg-rose-500/10 p-4 text-sm text-rose-800">
               {backendError}

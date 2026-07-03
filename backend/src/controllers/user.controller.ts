@@ -131,7 +131,7 @@ export const updateAvatar = async (req: AuthRequest, res: Response, next: NextFu
       return res.status(500).json({ success: false, message: 'Failed to upload profile picture.' });
     }
 
-    const user = await User.findByIdAndUpdate(req.user._id, { avatar: avatarUrl }, { new: true }).select('-password');
+    const user = await User.findByIdAndUpdate(req.user._id, { avatar: avatarUrl }, { returnDocument: 'after' }).select('-password');
 
     res.status(200).json({ success: true, data: user });
   } catch (error) {

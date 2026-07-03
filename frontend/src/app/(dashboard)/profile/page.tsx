@@ -23,7 +23,23 @@ export default function ProfilePage() {
   const [bio, setBio] = useState('');
   const [specialization, setSpecialization] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [gender, setGender] = useState('');
+
+  // Validate Indian mobile number:
+  // - exactly 10 digits
+  // - must start with 6, 7, 8, or 9 (Indian mobile range)
+  // - no country code prefix
+  // - no all-same digits (e.g. 9999999999 rejected)
+  const validatePhone = (value: string): string => {
+    if (!value || value.trim() === '') return ''; // optional field
+    const digits = value.replace(/\D/g, '');
+    if (digits.length === 0) return '';
+    if (digits.length !== 10) return `Phone must be exactly 10 digits (entered: ${digits.length})`;
+    if (!/^[6-9]/.test(digits)) return 'Phone must start with 6, 7, 8, or 9';
+    if (/^(.)\1{9}$/.test(digits)) return 'Phone cannot be all same digits (e.g. 9999999999)';
+    return '';
+  };
 
   // Sync state with user data
   useEffect(() => {
@@ -67,6 +83,18 @@ export default function ProfilePage() {
       showToast('Email cannot be empty.', 'error');
       return;
     }
+
+    // Phone validation (if provided)
+    const trimmedPhone = phone.trim();
+    if (trimmedPhone) {
+      const phoneValidationError = validatePhone(trimmedPhone);
+      if (phoneValidationError) {
+        setPhoneError(phoneValidationError);
+        showToast(phoneValidationError, 'error');
+        return;
+      }
+    }
+    setPhoneError('');
 
     const oldEmail = user.email;
 
@@ -173,7 +201,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto p-4 md:p-6 transition-all duration-300">
-      
+
       {/* Header section */}
       <div className="flex items-center justify-between gap-4 border-b border-border/40 pb-4">
         <div>
@@ -186,12 +214,12 @@ export default function ProfilePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
+
         {/* Left Side: Avatar Card */}
         <div className="md:col-span-1 space-y-6">
           <Card className="border-border/60 bg-card/60 backdrop-blur-md overflow-hidden text-center p-6 shadow-sm">
             <div className="flex flex-col items-center space-y-4">
-              
+
               {/* Profile Avatar Frame */}
               <div className="relative group cursor-pointer" onClick={triggerFileInput}>
                 {user.avatar ? (
@@ -206,7 +234,7 @@ export default function ProfilePage() {
                     {getInitials(user.name)}
                   </div>
                 )}
-                
+
                 {/* Upload Hover Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition duration-200">
                   <Camera className="h-6 w-6 text-white" />
@@ -220,7 +248,7 @@ export default function ProfilePage() {
                   <Shield className="h-3.5 w-3.5 text-accent" />
                   {user.role}
                 </span>
-                
+
                 <div className="flex flex-col gap-2 pt-3 justify-center">
                   <input
                     type="file"
@@ -240,7 +268,7 @@ export default function ProfilePage() {
                     <Camera className="h-3.5 w-3.5" />
                     Change Image
                   </Button>
-                  
+
                   {user.avatar && (
                     <Button
                       type="button"
@@ -285,7 +313,7 @@ export default function ProfilePage() {
             <CardContent className="pt-6">
               {isEditing ? (
                 <form onSubmit={handleProfileSave} className="space-y-4">
-                  
+
                   {/* Grid details */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
@@ -315,14 +343,37 @@ export default function ProfilePage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Phone Number</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Phone Number <span className="text-[10px] font-normal normal-case text-foreground/60">(optional, 10 digits)</span>
+                      </label>
                       <input
                         type="tel"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="e.g. +91 99999 88888"
-                        className="w-full h-10 px-3 border border-border rounded-lg bg-secondary/30 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-foreground"
+                        onChange={(e) => {
+                          // Only allow digits, max 10
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setPhone(val);
+                          setPhoneError(validatePhone(val));
+                        }}
+                        placeholder="e.g. 9876543210"
+                        maxLength={10}
+                        inputMode="numeric"
+                        className={`w-full h-10 px-3 border rounded-lg bg-secondary/30 text-sm focus:outline-hidden focus:ring-2 transition text-foreground ${
+                          phoneError
+                            ? 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500'
+                            : phone.length === 10 && !phoneError
+                            ? 'border-emerald-500 focus:ring-emerald-500/20 focus:border-emerald-500'
+                            : 'border-border focus:ring-primary/20 focus:border-primary'
+                        }`}
                       />
+                      {phoneError && (
+                        <p className="text-[11px] font-semibold text-rose-500 mt-0.5 flex items-center gap-1">
+                          <span>⚠</span> {phoneError}
+                        </p>
+                      )}
+                      {!phoneError && phone.length === 10 && (
+                        <p className="text-[11px] font-semibold text-emerald-500 mt-0.5">✓ Valid phone number</p>
+                      )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -411,7 +462,7 @@ export default function ProfilePage() {
                 // View Details Mode
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    
+
                     {/* Email Read-only */}
                     <div className="flex items-start gap-3 p-3.5 rounded-lg border border-border/40 bg-secondary/20">
                       <Mail className="h-5 w-5 text-accent mt-0.5" />

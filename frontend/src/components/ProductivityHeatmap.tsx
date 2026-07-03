@@ -130,11 +130,11 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
       {/* Streaks Card */}
       <div className="lg:col-span-1 glass rounded-2xl border border-border p-6 flex flex-col justify-between">
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground flex items-center gap-2">
             <Flame className="h-4 w-4 text-orange-500 animate-pulse" />
             <span>Activity Streaks</span>
           </h3>
-          <p className="text-xs text-muted-foreground mt-1">Keep completing tasks daily to build your streak!</p>
+          <p className="text-xs text-foreground/80 font-bold mt-1">Keep completing tasks daily to build your streak!</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 my-6">
@@ -142,7 +142,7 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
             <div className="absolute top-3 right-3 text-orange-400 opacity-70 pointer-events-none">
               <Flame className="h-8 w-8" />
             </div>
-            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Current Streak</p>
+            <p className="text-xs text-foreground/80 font-bold uppercase tracking-wide">Current Streak</p>
             <h4 className="text-4xl font-extrabold text-foreground mt-3 flex items-center justify-center gap-2">
               <span>{currentStreak}</span>
               <span className="text-sm text-orange-500 font-semibold">days</span>
@@ -153,7 +153,7 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
             <div className="absolute top-3 right-3 text-yellow-400 opacity-70 pointer-events-none">
               <Award className="h-8 w-8" />
             </div>
-            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Longest Streak</p>
+            <p className="text-xs text-foreground/80 font-bold uppercase tracking-wide">Longest Streak</p>
             <h4 className="text-4xl font-extrabold text-foreground mt-3 flex items-center justify-center gap-2">
               <span>{longestStreak}</span>
               <span className="text-sm text-yellow-500 font-semibold">days</span>
@@ -162,7 +162,7 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
         </div>
 
         <div className="flex items-center justify-between text-sm border-t border-border/40 pt-4">
-          <span className="text-muted-foreground font-medium">Total Completed:</span>
+          <span className="text-foreground/85 font-bold">Total Completed:</span>
           <span className="font-bold text-foreground bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-lg">
             {totalCompleted} Tasks
           </span>
@@ -172,11 +172,11 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
       {/* Heatmap Grid Card */}
       <div className="lg:col-span-2 glass rounded-2xl border border-border p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground flex items-center gap-2">
             <Calendar className="h-4 w-4 text-primary" />
             <span>Task Completion Heatmap</span>
           </h3>
-          <span className="text-[10px] bg-secondary/80 text-foreground px-2 py-0.5 rounded font-bold uppercase">
+          <span className="text-[10px] bg-secondary text-foreground px-2 py-0.5 border border-border/60 rounded font-extrabold uppercase">
             Last 60 Days
           </span>
         </div>
@@ -184,7 +184,7 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
         <div className="relative overflow-x-auto pb-2 scrollbar-none">
           <div className="min-w-[480px]">
             {/* Months Header Labels */}
-            <div className="flex pl-8 mb-2 text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+            <div className="flex pl-8 mb-2 text-[10px] text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider">
               {Array.from({ length: 9 }).map((_, index) => {
                 const date = new Date();
                 date.setDate(date.getDate() - (8 - index) * 7);
@@ -200,7 +200,7 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
             {/* Grid Container */}
             <div className="flex gap-2">
               {/* Days of Week Labels (Left Side) */}
-              <div className="flex flex-col justify-between text-[9px] font-bold text-muted-foreground h-[112px] w-6 pr-1 pt-1 select-none">
+              <div className="flex flex-col justify-between text-[9px] font-extrabold text-slate-700 dark:text-slate-300 h-[112px] w-6 pr-1 pt-1 select-none">
                 <span>Mon</span>
                 <span>Wed</span>
                 <span>Fri</span>
@@ -227,7 +227,7 @@ export const ProductivityHeatmap: React.FC<ProductivityHeatmapProps> = ({ tasks 
         </div>
 
         {/* Heatmap Legend */}
-        <div className="flex items-center justify-end gap-2 mt-4 text-[10px] text-muted-foreground font-bold uppercase select-none">
+        <div className="flex items-center justify-end gap-2 mt-4 text-[10px] text-foreground font-extrabold uppercase select-none">
           <span>Less</span>
           <div className="h-2.5 w-2.5 rounded-xs bg-secondary/40 dark:bg-slate-800/40" />
           <div className="h-2.5 w-2.5 rounded-xs bg-emerald-500/20" />

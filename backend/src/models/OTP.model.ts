@@ -1,13 +1,14 @@
 import { Schema, model, Document } from 'mongoose';
 import { IOTP } from '../types';
 
-export interface IOTPModel extends IOTP, Document {}
+export interface IOTPModel extends IOTP, Document { }
 
 const otpSchema = new Schema<IOTPModel>(
   {
-    email: { type: String, required: true, lowercase: true, trim: true },
+    email: { type: String, required: true, lowercase: true, trim: true, unique: true },
     otp: { type: String, required: true },
     expiresAt: { type: Date, required: true },
+    tempUserData: { type: Schema.Types.Mixed },
   },
   { timestamps: true }
 );

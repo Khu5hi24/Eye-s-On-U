@@ -16,10 +16,42 @@ const emailRegex = /^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@(?!\d)[A-Za-z][A-Za-z0
 
 const signupSchema = z
   .object({
-    name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be at most 100 characters'),
-    email: z.string().trim().min(1, 'Email is required').max(254, 'Email must be at most 254 characters').refine((v) => isValidEmail(v), 'Please enter a valid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters').max(128, 'Password must be at most 128 characters'),
-    confirmPassword: z.string().min(8, 'Password must be at least 8 characters').max(128, 'Password must be at most 128 characters'),
+    name: z.string().min(2, 'Please enter name atleast 2 characters.').max(100, 'Name must be at most 100 characters'),
+    email: z.string()
+      .min(1, 'Email is required.')
+      .max(254, 'Email is too long.')
+      .superRefine((v, ctx) => {
+        if (!v || v.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Email is required.',
+          });
+          return;
+        }
+        const trimmed = v.trim();
+        if (/[A-Z]/.test(trimmed)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Email cannot contain uppercase letters.',
+          });
+          return;
+        }
+        if ((trimmed.match(/@/g) || []).length !== 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Please enter a valid email address.',
+          });
+          return;
+        }
+        if (!isValidEmail(trimmed)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Please enter a valid email address.',
+          });
+        }
+      }),
+    password: z.string().min(8, 'Please enter your password.').max(128, 'Password must be at most 128 characters'),
+    confirmPassword: z.string().min(8, 'Please enter your confirmed password.').max(128, 'Password must be at most 128 characters'),
     role: z.enum(['employee', 'admin']),
     // adminSecretCode removed per request
     profilePicture: z.any().optional(),
@@ -43,6 +75,7 @@ export default function SignupPage() {
     formState: { errors },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
+    mode: 'onChange',
     defaultValues: {},
   });
 

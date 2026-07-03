@@ -19,6 +19,7 @@ export interface IOTP {
   email: string;
   otp: string;
   expiresAt: Date;
+  tempUserData?: any;
 }
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';

@@ -36,7 +36,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
               <Sparkles className="h-5 w-5 text-accent animate-pulse-soft" />
             </div>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-accent">
+            <span className="text-sm font-bold uppercase tracking-[0.25em] text-accent">
               EYE&apos;S ON U
             </span>
           </div>
@@ -61,14 +61,14 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
                 {tabActive === 'login' ? (
                   <>
                     Don&apos;t have an account?{' '}
-                    <Link href="/signup" className="text-accent font-semibold hover:underline">
+                    <Link href="/signup" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
                       Sign up
                     </Link>
                   </>
                 ) : (
                   <>
                     Already have an account?{' '}
-                    <Link href="/login" className="text-accent font-semibold hover:underline">
+                    <Link href="/login" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
                       Log in
                     </Link>
                   </>

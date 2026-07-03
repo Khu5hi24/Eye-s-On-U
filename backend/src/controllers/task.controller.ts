@@ -65,7 +65,7 @@ export const updateTask = async (req: AuthRequest, res: Response, next: NextFunc
     }
 
     const updatePayload = req.body ?? {};
-    const task = await Task.findByIdAndUpdate(req.params.id, updatePayload, { new: true })
+    const task = await Task.findByIdAndUpdate(req.params.id, updatePayload, { returnDocument: 'after' })
       .populate('assignedTo', 'name email role avatar bio')
       .populate('createdBy', 'name email role avatar bio');
     if (!task) {
@@ -99,7 +99,7 @@ export const updateTaskStatus = async (req: AuthRequest, res: Response, next: Ne
     const task = await Task.findOneAndUpdate(
       isAdmin(req) ? { _id: req.params.id } : { _id: req.params.id, assignedTo: req.user._id },
       { status },
-      { new: true }
+      { returnDocument: 'after' }
     )
       .populate('assignedTo', 'name email role avatar bio')
       .populate('createdBy', 'name email role avatar bio');

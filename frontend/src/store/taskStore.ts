@@ -25,7 +25,7 @@ export interface UnifiedState {
   loading: boolean;
   error?: string;
   loadDashboardData: () => Promise<void>;
-  createTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  createTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => Promise<any>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   setFilters: (filters: Partial<TaskFilters>) => void;
@@ -195,8 +195,10 @@ export const useTaskStore = create<UnifiedState>((set, get) => ({
       });
       await get().loadDashboardData();
       useToastStore.getState().showToast(`Task "${task.title}" created.`, 'success');
+      return task;
     } catch (error) {
       useToastStore.getState().showToast(getErrorMessage(error, 'Unable to create task.'), 'error');
+      return null;
     }
   },
 

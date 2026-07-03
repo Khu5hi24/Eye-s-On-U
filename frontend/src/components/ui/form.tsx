@@ -70,9 +70,9 @@ export const PasswordField = React.forwardRef<HTMLInputElement, FieldProps>(
             tabIndex={-1}
           >
             {showPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
               <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
             )}
           </button>
         </div>

@@ -47,24 +47,22 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     const normalizedRole: 'admin' | 'employee' | 'user' =
       typeof role === 'string' && (allowedRoles as readonly string[]).includes(role) ? (role as 'admin' | 'employee' | 'user') : 'employee';
 
-    const user = await User.create({
+    const otp = generateOTP();
+    const tempUserData = {
       name,
       email: normalizedEmail,
       password: hashedPassword,
       avatar,
-      role: normalizedRole,
-      isVerified: false,
-    } as any);
-
-    const otp = generateOTP();
-    await saveOTP(normalizedEmail, otp);
+      role: normalizedRole
+    };
+    await saveOTP(normalizedEmail, otp, tempUserData);
     await sendOTPEmail(normalizedEmail, otp, 'Verify Your Account', 'Use the OTP to verify your account');
 
     res.status(201).json({
       success: true,
       requiresVerification: true,
       message: 'User registered successfully. OTP sent to email.',
-      data: { userId: user._id, email: user.email },
+      data: { email: normalizedEmail },
     });
   } catch (error) {
     next(error);
@@ -74,16 +72,30 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 export const verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, otp } = req.body;
-    const valid = await verifyOTP(email, otp);
+    const normalizedEmail = (email || '').toString().toLowerCase().trim();
+    const record = await verifyOTP(normalizedEmail, otp);
 
-    if (!valid) {
+    if (!record) {
       return res.status(400).json({ success: false, message: 'Invalid or expired OTP.' });
     }
 
-    const user = await User.findOneAndUpdate({ email }, { isVerified: true }, { new: true });
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found.' });
+    if (!record.tempUserData) {
+      return res.status(400).json({ success: false, message: 'No registration data found for this email.' });
     }
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email already registered.' });
+    }
+
+    await User.create({
+      name: record.tempUserData.name,
+      email: normalizedEmail,
+      password: record.tempUserData.password,
+      avatar: record.tempUserData.avatar,
+      role: record.tempUserData.role,
+      isVerified: true,
+    } as any);
 
     res.status(200).json({ success: true, message: 'Account verified successfully.' });
   } catch (error) {

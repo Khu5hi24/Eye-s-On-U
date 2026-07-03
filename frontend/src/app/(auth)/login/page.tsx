@@ -15,8 +15,40 @@ import { useToastStore } from '@/store/toastStore';
 import { Sparkles } from 'lucide-react';
 
 const loginSchema = z.object({
-  email: z.string().trim().min(1, 'Email is required').max(254, 'Email must be at most 254 characters').refine((v) => isValidEmail(v), 'Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(128, 'Password must be at most 128 characters'),
+  email: z.string()
+    .min(1, 'Email is required.')
+    .max(254, 'Email is too long.')
+    .superRefine((v, ctx) => {
+      if (!v || v.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Email is required.',
+        });
+        return;
+      }
+      const trimmed = v.trim();
+      if (/[A-Z]/.test(trimmed)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Email cannot contain uppercase letters.',
+        });
+        return;
+      }
+      if ((trimmed.match(/@/g) || []).length !== 1) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Please enter a valid email address.',
+        });
+        return;
+      }
+      if (!isValidEmail(trimmed)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Please enter a valid email address.',
+        });
+      }
+    }),
+  password: z.string().min(8, 'Please enter your password.').max(128, 'Password must be at most 128 characters'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -29,6 +61,7 @@ export default function LoginPage() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
+    mode: 'onChange',
   });
 
   // Clear previous errors when the login page is loaded and when it unmounts
@@ -68,7 +101,7 @@ export default function LoginPage() {
           <div className="relative flex items-center justify-center h-16 w-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 shadow-sm shadow-emerald-500/5">
             <Sparkles className="h-8 w-8 text-accent animate-pulse" />
           </div>
-          
+
           <div className="space-y-1.5">
             <h2 className="text-xl font-semibold tracking-tight text-foreground font-heading">
               Welcome back, {user?.name || 'User'}!
@@ -77,7 +110,7 @@ export default function LoginPage() {
               Preparing your workspace...
             </p>
           </div>
-          
+
           {/* Bounce loader */}
           <div className="flex items-center justify-center gap-1 pt-1">
             <span className="h-1.5 w-1.5 rounded-full bg-accent animate-bounce [animation-delay:-0.3s]" />
@@ -91,7 +124,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout title="Welcome back!" tabActive="login">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" noValidate>
         <InputField label="Email address" id="email" type="email" autoComplete="email" placeholder="Please enter your email address" error={errors.email} maxLength={254} {...register('email')} />
         <PasswordField label="Password" id="password" autoComplete="current-password" placeholder="Please enter your secure password" error={errors.password} maxLength={128} {...register('password')} />
 
@@ -104,7 +137,7 @@ export default function LoginPage() {
               </p>
             ) : null}
           </div>
-          <Link href="/forgot-password" className="text-xs font-semibold text-accent hover:underline leading-none">
+          <Link href="/forgot-password" className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline leading-none">
             Forgot password?
           </Link>
         </div>

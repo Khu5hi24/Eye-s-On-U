@@ -73,7 +73,7 @@ export const DashboardCards: React.FC = () => {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{card.title}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wider text-foreground/80">{card.title}</p>
                     <h3 className="mt-2.5 text-3xl font-bold tracking-tight text-foreground font-heading">{card.count}</h3>
                   </div>
                   <div className={cn('flex h-11 w-11 items-center justify-center rounded-md shadow-xs', card.bg)}>
@@ -85,7 +85,7 @@ export const DashboardCards: React.FC = () => {
                   <span className={cn('inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold uppercase tracking-wide', card.isPositive ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400')}>
                     {card.percentage}%
                   </span>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{card.growth}</span>
+                  <span className="text-xs font-bold text-foreground/80 uppercase tracking-wide">{card.growth}</span>
                 </div>
 
                 <div className="mt-4 h-1 overflow-hidden rounded-sm bg-secondary">

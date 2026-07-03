@@ -16,13 +16,15 @@ import {
   Clock,
   Edit3,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  X
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { CalendarPicker } from '@/components/ui/CalendarPicker';
 import { cn, formatDate } from '@/utils';
 import { TaskStatus, TaskPriority, TeamMember } from '@/types';
-import { TeamMemberModal } from '@/components/TeamMemberModal';
+import { useToastStore } from '@/store/toastStore';
 
 export default function TaskDetailPage(props: any) {
   const { params } = props as { params: Promise<{ id: string }> };
@@ -48,6 +50,92 @@ export default function TaskDetailPage(props: any) {
   const [editAssignee, setEditAssignee] = useState('');
   const [editDueDate, setEditDueDate] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Attachments State
+  interface Attachment {
+    name: string;
+    size: string;
+    type: string;
+    base64: string;
+  }
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(`attachments_${id}`);
+      if (stored) {
+        try {
+          setAttachments(JSON.parse(stored));
+        } catch (e) {
+          console.error('Failed to parse attachments', e);
+        }
+      }
+    }
+  }, [id]);
+
+  const saveAttachments = (newFiles: Attachment[]) => {
+    setAttachments(newFiles);
+    localStorage.setItem(`attachments_${id}`, JSON.stringify(newFiles));
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newAttachments = [...attachments];
+    const { showToast } = useToastStore.getState();
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      // Limit check: 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        showToast(`File "${file.name}" is too large. Please select a file smaller than 5 MB.`, 'error');
+        continue;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        const formattedSize = (() => {
+          if (file.size === 0) return '0 Bytes';
+          const k = 1024;
+          const sizes = ['Bytes', 'KB', 'MB'];
+          const idx = Math.floor(Math.log(file.size) / Math.log(k));
+          return parseFloat((file.size / Math.pow(k, idx)).toFixed(1)) + ' ' + sizes[idx];
+        })();
+
+        // Prevent duplicate file name upload in same session
+        if (newAttachments.some(a => a.name === file.name)) {
+          return;
+        }
+
+        newAttachments.push({
+          name: file.name,
+          size: formattedSize,
+          type: file.name.split('.').pop() || 'unknown',
+          base64
+        });
+
+        saveAttachments([...newAttachments]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveAttachment = (nameToRemove: string) => {
+    const updated = attachments.filter(a => a.name !== nameToRemove);
+    saveAttachments(updated);
+  };
+
+  const handleDownloadAttachment = (file: Attachment) => {
+    const link = document.createElement('a');
+    link.href = file.base64;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -112,10 +200,7 @@ export default function TaskDetailPage(props: any) {
   const deadlineInfo = calculateDeadline();
 
   // Mock Attachments
-  const mockAttachments = [
-    { name: 'technical_specifications_v1.pdf', size: '2.4 MB', type: 'pdf' },
-    { name: 'wireframe_mockups_review.fig', size: '15.8 MB', type: 'figma' },
-  ];
+  const mockAttachments: Array<{ name: string; size: string; type: string }> = [];
 
   const handleSaveEdit = () => {
     updateTask(task.id, {
@@ -197,28 +282,45 @@ export default function TaskDetailPage(props: any) {
               <div className="border-t border-border/40 pt-6">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
                   <Paperclip className="h-4 w-4" />
-                  Attachments ({mockAttachments.length})
+                  Attachments ({attachments.length})
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {mockAttachments.map((file, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 border border-border bg-secondary/20 hover:bg-secondary/40 transition-colors rounded-xl flex items-center justify-between cursor-pointer group"
-                      onClick={() => alert(`Opening mockup download for: ${file.name}`)}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Paperclip className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-foreground truncate">{file.name}</p>
-                          <p className="text-[10px] text-muted-foreground">{file.size}</p>
+                {attachments.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic">No files attached to this task.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {attachments.map((file, idx) => {
+                      const isImg = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(file.type.toLowerCase());
+                      return (
+                        <div
+                          key={idx}
+                          className="p-3 border border-border bg-secondary/20 hover:bg-secondary/40 transition-colors rounded-xl flex items-center justify-between cursor-pointer group"
+                          onClick={() => handleDownloadAttachment(file)}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {isImg ? (
+                              <img
+                                src={file.base64}
+                                alt={file.name}
+                                className="h-9 w-9 rounded-lg object-cover border border-border shrink-0"
+                              />
+                            ) : (
+                              <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center border border-border shrink-0 text-[10px] font-bold text-muted-foreground uppercase">
+                                {file.type.substring(0, 3)}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-foreground truncate">{file.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{file.size}</p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] bg-secondary px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+                            Download
+                          </span>
                         </div>
-                      </div>
-                      <span className="text-[10px] bg-secondary px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                        Download
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
             </CardContent>
@@ -277,17 +379,22 @@ export default function TaskDetailPage(props: any) {
               </h3>
 
               {assignee ? (
-                <button
-                  type="button"
-                  onClick={() => setSelectedMember(assignee)}
-                  className="flex items-center gap-3.5 group hover:bg-secondary/20 p-2 rounded-xl transition-colors"
+                <Link
+                  href={`/team/${assignee.id}`}
+                  className="flex items-center gap-3.5 group hover:bg-secondary/20 p-2 rounded-xl transition-colors text-left"
                 >
                   <div className="relative">
-                    <img
-                      src={assignee.avatar}
-                      alt={assignee.name}
-                      className="h-12 w-12 rounded-full object-cover border border-border"
-                    />
+                    {assignee.avatar ? (
+                      <img
+                        src={assignee.avatar}
+                        alt={assignee.name}
+                        className="h-12 w-12 rounded-full object-cover border border-border"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-accent/20 to-accent/30 border border-accent/20 text-accent flex items-center justify-center text-sm font-bold font-heading shadow-inner">
+                        {assignee.name?.split(' ').filter(Boolean).map((n: string) => n[0]).join('').toUpperCase().substring(0, 2) || 'U'}
+                      </div>
+                    )}
                     <span className={cn(
                       "absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-card",
                       assignee.status === 'active' && 'bg-emerald-500',
@@ -304,7 +411,7 @@ export default function TaskDetailPage(props: any) {
                       {assignee.status}
                     </span>
                   </div>
-                </button>
+                </Link>
               ) : (
                 <div className="flex items-center gap-3 p-4 border border-dashed border-border rounded-xl">
                   <User className="h-6 w-6 text-muted-foreground stroke-1" />
@@ -448,6 +555,62 @@ export default function TaskDetailPage(props: any) {
                   )}
                 </div>
               </div>
+            </div>
+            {/* File Attachments */}
+            <div className="space-y-2 border-t border-border/30 pt-4">
+              <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <Paperclip className="h-3.5 w-3.5" />
+                <span>Task Attachments (Max 5 MB per file)</span>
+              </label>
+              
+              <div className="flex items-center gap-2">
+                <label className="flex items-center justify-center gap-2 px-3 py-2 border border-border border-dashed hover:border-solid hover:bg-secondary/40 rounded-lg cursor-pointer transition-all text-xs font-semibold text-muted-foreground hover:text-foreground">
+                  <Upload className="h-3.5 w-3.5" />
+                  <span>Choose Files</span>
+                  <input
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                </label>
+              </div>
+
+              {attachments.length > 0 && (
+                <div className="space-y-1.5 max-h-36 overflow-y-auto mt-2 pr-1">
+                  {attachments.map((file, idx) => {
+                    const isImg = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(file.type.toLowerCase());
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30 border border-border/50 text-xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {isImg ? (
+                            <img
+                              src={file.base64}
+                              alt={file.name}
+                              className="h-7 w-7 rounded object-cover border border-border shrink-0"
+                            />
+                          ) : (
+                            <div className="h-7 w-7 rounded bg-secondary flex items-center justify-center border border-border shrink-0 text-[8px] font-bold text-muted-foreground uppercase">
+                              {file.type.substring(0, 3)}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate text-foreground font-semibold">{file.name}</p>
+                            <p className="text-[9px] text-muted-foreground">{file.size}</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAttachment(file.name)}
+                          className="text-muted-foreground hover:text-destructive p-1 rounded-md transition-colors"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t border-border/30">

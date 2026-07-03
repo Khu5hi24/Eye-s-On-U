@@ -1,50 +1,71 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { 
+import {
   Bell,
-  User, 
-  Settings, 
-  LogOut, 
-  Sparkles, 
-  CheckCheck, 
-  Menu
+  User,
+  Settings,
+  LogOut,
+  Sparkles,
+  CheckCheck,
+  Menu,
+  Clock,
+  Calendar
 } from 'lucide-react';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/auth.store';
 import { ThemeToggle } from './ThemeToggle';
 import { Button } from './ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuTrigger, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
 } from './ui/dropdown-menu';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription, 
-  DialogFooter 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
 } from './ui/dialog';
 import { cn } from '../utils';
 
 export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) => {
 
-  const { 
-    profile: taskProfile, 
-    notifications, 
-    markNotificationAsRead, 
+  const {
+    profile: taskProfile,
+    notifications,
+    markNotificationAsRead,
     markAllNotificationsAsRead,
     clearNotifications,
   } = useTaskStore();
   const { user, logout, updateProfile } = useAuthStore();
   const router = useRouter();
+
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setCurrentTime(new Date());
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDateTime = (date: Date) => {
+    const day = date.toLocaleDateString('en-US', { weekday: 'long' }); // Friday
+    const dateStr = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }); // Jul 3, 2026
+    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }); // 12:59:25 PM
+    return { day, dateStr, timeStr };
+  };
+
+  const formatted = currentTime ? formatDateTime(currentTime) : null;
 
   const profile = user ?? taskProfile ?? {
     name: 'Guest User',
@@ -89,20 +110,32 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
           </Link>
         </div>
 
-        <div className="hidden items-center gap-2 rounded-md border border-border bg-secondary/50 px-3 py-1.5 shadow-xs md:flex">
+        {/* Live Date, Time & Day indicator */}
+        <div className="hidden items-center gap-3 rounded-lg border border-border bg-secondary/30 px-3.5 py-1.5 shadow-xs md:flex">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-accent/10 text-accent">
-            <Sparkles className="h-3.5 w-3.5" />
+            <Clock className="h-3.5 w-3.5" />
           </div>
-          <span className="text-xs font-semibold text-muted-foreground tracking-wide uppercase">Focus on what matters</span>
+          {formatted ? (
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <span className="font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">{formatted.day}</span>
+              <span>{formatted.dateStr}</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-border" />
+              <span className="font-mono font-semibold text-foreground">{formatted.timeStr}</span>
+            </div>
+          ) : (
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Loading...</span>
+          )}
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link href="/tasks/new">
-            <Button variant="outline" className="hidden h-9 rounded-md px-3.5 text-xs font-semibold sm:flex">
-              <span className="mr-1 text-sm font-normal">+</span>
-              Quick Add
-            </Button>
-          </Link>
+          {user?.role === 'admin' && (
+            <Link href="/tasks/new">
+              <Button variant="outline" className="hidden h-9 rounded-md px-3.5 text-xs font-semibold sm:flex">
+                <span className="mr-1 text-sm font-normal">+</span>
+                Quick Add
+              </Button>
+            </Link>
+          )}
           <ThemeToggle />
           {/* Notifications Dropdown */}
           <DropdownMenu>
@@ -120,9 +153,9 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
               <div className="flex items-center justify-between p-3 border-b border-border/30">
                 <DropdownMenuLabel className="p-0 text-sm font-semibold">Notifications</DropdownMenuLabel>
                 {unreadCount > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-7 px-2 text-[11px] font-medium flex items-center gap-1 text-primary hover:bg-secondary"
                     onClick={markAllNotificationsAsRead}
                   >
@@ -169,9 +202,9 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
               </div>
               {notifications.length > 0 && (
                 <div className="p-2 border-t border-border/30 bg-secondary/10 flex justify-center">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-7 w-full text-xs text-muted-foreground hover:text-foreground font-medium"
                     onClick={clearNotifications}
                   >
@@ -187,9 +220,9 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
             <DropdownMenuTrigger asChild>
               <button className="h-9 w-9 rounded-full overflow-hidden border border-border/80 cursor-pointer shadow-xs hover:scale-105 transition-transform outline-hidden flex items-center justify-center bg-gradient-to-tr from-[#b89772]/20 to-[#c5a880]/30 text-accent font-bold text-xs font-heading">
                 {profile.avatar ? (
-                  <img 
-                    src={profile.avatar} 
-                    alt={profile.name} 
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name}
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -206,7 +239,7 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => router.push('/profile')}
                 className="cursor-pointer"
               >
@@ -214,7 +247,7 @@ export const Navbar: React.FC<{ onMenuClick?: () => void }> = ({ onMenuClick }) 
                 <span>View Profile</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={async () => {
                   await logout();
                   router.push('/login');

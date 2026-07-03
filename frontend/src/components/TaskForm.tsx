@@ -10,7 +10,10 @@ import { cn } from '../utils';
 
 interface TaskFormProps {
   initialData?: Task;
-  onSubmit: (data: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSubmit: (
+    data: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>,
+    file?: { name: string; size: string; type: string; base64: string } | null
+  ) => void;
   onCancel: () => void;
   submitLabel?: string;
 }
@@ -39,6 +42,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [attachedBase64, setAttachedBase64] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileError(null);
@@ -53,24 +57,42 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
     setAttachedFile(file);
 
-    // Create preview URL if it's an image
-    if (file.type.startsWith('image/')) {
-      const url = URL.createObjectURL(file);
-      setFilePreview(url);
-    } else {
-      setFilePreview(null);
-    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setAttachedBase64(base64);
+      if (file.type.startsWith('image/')) {
+        setFilePreview(base64);
+      } else {
+        setFilePreview(null);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const removeAttachedFile = () => {
     setAttachedFile(null);
     setFilePreview(null);
     setFileError(null);
+    setAttachedBase64(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !assignedTo) return;
+
+    const filePayload = attachedFile && attachedBase64 ? {
+      name: attachedFile.name,
+      size: (() => {
+        if (attachedFile.size === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const idx = Math.floor(Math.log(attachedFile.size) / Math.log(k));
+        return parseFloat((attachedFile.size / Math.pow(k, idx)).toFixed(1)) + ' ' + sizes[idx];
+      })(),
+      type: attachedFile.name.split('.').pop() || 'unknown',
+      base64: attachedBase64
+    } : null;
 
     onSubmit({
       title: title.trim(),
@@ -79,7 +101,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       priority,
       assignedTo,
       dueDate,
-    });
+    }, filePayload);
   };
 
   useEffect(() => {
@@ -93,7 +115,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
       {/* Title */}
       <div className="space-y-1.5">
-        <label htmlFor="task-title" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        <label htmlFor="task-title" className="text-xs font-extrabold uppercase tracking-wider text-foreground/90">
           Task Title
         </label>
         <input
@@ -109,7 +131,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
       {/* Description */}
       <div className="space-y-1.5">
-        <label htmlFor="task-desc" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        <label htmlFor="task-desc" className="text-xs font-extrabold uppercase tracking-wider text-foreground/90">
           Description
         </label>
         <textarea
@@ -124,8 +146,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
       {/* File Attachment */}
       <div className="space-y-2">
-        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-          Attachment <span className="text-[10px] text-muted-foreground/50 font-normal normal-case">(optional, max 5MB)</span>
+        <label className="text-xs font-extrabold uppercase tracking-wider text-foreground/90 flex items-center gap-1">
+          Attachment <span className="text-[10px] text-foreground/80 font-bold normal-case">(optional, max 5MB)</span>
         </label>
         
         <div className="flex flex-col gap-3">
@@ -140,7 +162,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 <Paperclip className="h-4 w-4" />
                 Attach a file
               </span>
-              <p className="text-[10px] text-muted-foreground mt-1">Images, PDFs, or documents up to 5MB</p>
+              <p className="text-[10px] text-foreground/75 font-semibold mt-1">Images, PDFs, or documents up to 5MB</p>
             </div>
           ) : (
             <div className="flex items-center gap-3 p-3 bg-secondary/25 border border-border/60 rounded-xl relative group">
@@ -186,7 +208,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
         {/* Status */}
         <div className="space-y-1.5">
-          <label htmlFor="task-status" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <label htmlFor="task-status" className="text-xs font-extrabold uppercase tracking-wider text-foreground/90">
             Status
           </label>
           <select
@@ -204,7 +226,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
         {/* Priority */}
         <div className="space-y-1.5">
-          <label htmlFor="task-priority" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <label htmlFor="task-priority" className="text-xs font-extrabold uppercase tracking-wider text-foreground/90">
             Priority
           </label>
           <select
@@ -222,7 +244,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
         {/* Assignee */}
         <div className="space-y-1.5">
-          <label htmlFor="task-assignee" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <label htmlFor="task-assignee" className="text-xs font-extrabold uppercase tracking-wider text-foreground/90">
             Assign Team Member
           </label>
           <select
@@ -244,7 +266,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
         {/* Due Date Picker */}
         <div className="space-y-1.5 relative">
-          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <label className="text-xs font-extrabold uppercase tracking-wider text-foreground/90">
             Due Date
           </label>
           <div>
@@ -253,8 +275,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               onClick={() => setShowDatePicker(!showDatePicker)}
               className="w-full h-11 px-4 border border-border rounded-xl bg-secondary/30 text-sm flex items-center justify-between hover:bg-secondary/50 focus:outline-hidden focus:ring-2 focus:ring-primary/20 transition-all text-left"
             >
-              <span className="font-medium text-foreground">{dueDate}</span>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="font-bold text-foreground">{dueDate}</span>
+              <Calendar className="h-4 w-4 text-blue-500" />
             </button>
 
             {showDatePicker && (
