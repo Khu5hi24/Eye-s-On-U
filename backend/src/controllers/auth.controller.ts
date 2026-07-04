@@ -20,8 +20,22 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     const normalizedEmail = (email || '').toString().toLowerCase().trim();
     const file = (req as any).file || (req as any).files?.profilePicture?.[0] || (req as any).files?.avatar?.[0];
 
-    if (!name || !email || !password) {
+    const trimmedName = (name || '').toString().trim();
+
+    if (!trimmedName || !email || !password) {
       return res.status(400).json({ success: false, message: 'Name, email and password are required.' });
+    }
+
+    if (!/^[a-zA-Z]/.test(trimmedName)) {
+      return res.status(400).json({ success: false, message: 'Name must start with an alphabet.' });
+    }
+
+    if (/\s{2,}/.test(trimmedName)) {
+      return res.status(400).json({ success: false, message: 'Multiple consecutive spaces are not allowed in name.' });
+    }
+
+    if (!/^[a-zA-Z]+( [a-zA-Z]+)*$/.test(trimmedName)) {
+      return res.status(400).json({ success: false, message: 'Name can only contain alphabets and single spaces.' });
     }
 
     if (!isValidEmail(normalizedEmail)) {
@@ -49,7 +63,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     const otp = generateOTP();
     const tempUserData = {
-      name,
+      name: trimmedName,
       email: normalizedEmail,
       password: hashedPassword,
       avatar,

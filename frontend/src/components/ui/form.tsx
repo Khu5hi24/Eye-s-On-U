@@ -95,7 +95,7 @@ export const FileInputField = React.forwardRef<HTMLInputElement, FieldProps>(
           id={id}
           ref={ref}
           type="file"
-          accept="image/svg+xml,image/jpeg,image/png"
+          accept="image/*"
           className={cn(
             'w-full rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground transition file:mr-3 file:cursor-pointer file:border-0 file:bg-secondary file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-foreground file:rounded-sm focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring',
             errorMessage && 'border-destructive focus:border-destructive focus:ring-destructive/30',

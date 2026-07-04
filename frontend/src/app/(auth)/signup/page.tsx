@@ -16,7 +16,31 @@ const emailRegex = /^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@(?!\d)[A-Za-z][A-Za-z0
 
 const signupSchema = z
   .object({
-    name: z.string().min(2, 'Please enter name atleast 2 characters.').max(100, 'Name must be at most 100 characters'),
+    name: z.string()
+      .min(2, 'Please enter name atleast 2 characters.')
+      .max(100, 'Name must be at most 100 characters')
+      .superRefine((val, ctx) => {
+        if (!/^[a-zA-Z]/.test(val)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Name must start with an alphabet.',
+          });
+          return;
+        }
+        if (/\s{2,}/.test(val)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Multiple consecutive spaces are not allowed.',
+          });
+          return;
+        }
+        if (!/^[a-zA-Z]+( [a-zA-Z]+)* ?$/.test(val)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Name can only contain alphabets and single spaces.',
+          });
+        }
+      }),
     email: z.string()
       .min(1, 'Email is required.')
       .max(254, 'Email is too long.')
@@ -89,7 +113,7 @@ export default function SignupPage() {
     }
 
     const success = await signup({
-      name: data.name,
+      name: data.name.trim(),
       email: data.email.toLowerCase(),
       role: data.role,
       password: data.password,
@@ -107,7 +131,21 @@ export default function SignupPage() {
   return (
     <AuthLayout title="Create your account" tabActive="signup">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
-        <InputField label="Full name" id="name" autoComplete="name" placeholder="Please enter your full name" error={errors.name} maxLength={100} {...register('name')} />
+        <InputField
+          label="Full name"
+          id="name"
+          autoComplete="name"
+          placeholder="Please enter your full name"
+          error={errors.name}
+          maxLength={100}
+          {...register('name', {
+            onChange: (e) => {
+              let val = e.target.value;
+              val = val.replace(/\s{2,}/g, ' ');
+              e.target.value = val;
+            }
+          })}
+        />
         <InputField label="Email address" id="email" type="email" autoComplete="email" placeholder="Please enter your email address" error={errors.email} maxLength={254} {...register('email')} />
         <PasswordField label="Password" id="password" autoComplete="new-password" placeholder="Please choose a strong password" error={errors.password} maxLength={128} {...register('password')} />
         <PasswordField label="Confirm password" id="confirmPassword" autoComplete="new-password" placeholder="Please confirm your chosen password" error={errors.confirmPassword} maxLength={128} {...register('confirmPassword')} />
