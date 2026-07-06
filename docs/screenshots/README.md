@@ -8,12 +8,17 @@ This directory is reserved for visual screenshots referenced in the main documen
 
 When deploying the project or completing visual updates, capture and save screenshots matching these exact filenames:
 
-1. **`dashboard.png`**: Standard user dashboard view showing Recharts, recent tasks list, and the activity feed.
-2. **`login.png`**: Login screen displaying input fields, validation error triggers, and theme selectors.
-3. **`profile.png`**: User profile configuration page showing the details update form and the avatar upload area.
-4. **`task-management.png`**: Task list page showing search queries, status filter tabs, and sort dropdowns.
-5. **`forgot-password.png`**: Forgot password view including the verification email input field and recovery code fields.
-6. **`admin-dashboard.png`**: Admin view showing the create task button, the team management table, and role/specialization controls.
+1. **`landing.png`**: Landing / Home page displaying introduction text, theme toggles, and authentication triggers.
+2. **`signup.png`**: Registration page showing text inputs for name, email, credentials, roles, and profile image file upload.
+3. **`login.png`**: Login screen displaying input fields, validation triggers, and theme toggles.
+4. **`forgot-password.png`**: Forgot password view including verification email inputs and reset password complexity criteria.
+5. **`dashboard.png`**: Main dashboard showing tasks counters, weekly activity, status distribution, and leaderboard.
+6. **`admin-dashboard.png`**: Admin view of the dashboard, showing the management sidebar tools.
+7. **`profile.png`**: User profile details screen.
+8. **`profile-edit.png`**: Profile configuration page showing input forms for editing.
+9. **`task-management.png`**: Task list and active team members panels shown in the dashboard bottom area.
+10. **`create-task.png`**: Create new task scheduling page.
+11. **`analytics.png`**: Dedicated analytics panel displaying performance charts and AI insights.
 
 ---
 

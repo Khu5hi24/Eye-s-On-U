@@ -239,6 +239,10 @@ For complete instructions, see the [Deployment and Build Guide](./docs/deploymen
 
 Visual screen captures showing the application forms and panels:
 
+* **Landing Page**:
+  ![Landing Screenshot](./docs/screenshots/landing.png)
+* **Signup Page**:
+  ![Signup Screenshot](./docs/screenshots/signup.png)
 * **Login Page**:
   ![Login Screenshot](./docs/screenshots/login.png)
 * **Forgot Password Flow**:
@@ -249,8 +253,14 @@ Visual screen captures showing the application forms and panels:
   ![Admin Dashboard Screenshot](./docs/screenshots/admin-dashboard.png)
 * **Task Management Portal**:
   ![Task Management Screenshot](./docs/screenshots/task-management.png)
+* **Create Task Page**:
+  ![Create Task Screenshot](./docs/screenshots/create-task.png)
 * **Profile Configuration**:
   ![Profile Screenshot](./docs/screenshots/profile.png)
+* **Profile Editing**:
+  ![Profile Editing Screenshot](./docs/screenshots/profile-edit.png)
+* **Analytics Panel**:
+  ![Analytics Screenshot](./docs/screenshots/analytics.png)
 
 ---
 
