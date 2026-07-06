@@ -10,6 +10,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { UserRound, Camera, Trash2, Edit3, X, Save, Shield, Mail, Phone, Info } from 'lucide-react';
 
+const countries = [
+  { code: '+91', name: 'India', iso: 'in' },
+  { code: '+1', name: 'United States', iso: 'us' },
+  { code: '+44', name: 'United Kingdom', iso: 'gb' },
+  { code: '+61', name: 'Australia', iso: 'au' },
+  { code: '+966', name: 'Saudi Arabia', iso: 'sa' },
+  { code: '+971', name: 'United Arab Emirates', iso: 'ae' },
+  { code: '+65', name: 'Singapore', iso: 'sg' },
+  { code: '+49', name: 'Germany', iso: 'de' },
+  { code: '+33', name: 'France', iso: 'fr' },
+  { code: '+880', name: 'Bangladesh', iso: 'bd' },
+  { code: '+92', name: 'Pakistan', iso: 'pk' },
+  { code: '+977', name: 'Nepal', iso: 'np' },
+  { code: '+94', name: 'Sri Lanka', iso: 'lk' },
+  { code: '+974', name: 'Qatar', iso: 'qa' },
+  { code: '+965', name: 'Kuwait', iso: 'kw' },
+  { code: '+968', name: 'Oman', iso: 'om' },
+  { code: '+973', name: 'Bahrain', iso: 'bh' }
+];
+
 export default function ProfilePage() {
   const { user, isAuthenticated, updateProfile, updateAvatar, loading } = useAuth();
   const router = useRouter();
@@ -20,23 +40,60 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [bio, setBio] = useState('');
   const [specialization, setSpecialization] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [gender, setGender] = useState('');
 
-  // Validate Indian mobile number:
-  // - exactly 10 digits
-  // - must start with 6, 7, 8, or 9 (Indian mobile range)
-  // - no country code prefix
-  // - no all-same digits (e.g. 9999999999 rejected)
-  const validatePhone = (value: string): string => {
+  // Parse phone stored format: e.g. "+91 9876543210" or "+19876543210" or "9876543210"
+  const parsePhone = (rawPhone: string) => {
+    if (!rawPhone) return { countryCode: '+91', number: '' };
+    const clean = rawPhone.replace(/\s+/g, '');
+    if (clean.startsWith('+')) {
+      // Find the last 10 digits as the number
+      const numberPart = clean.slice(-10);
+      const codePart = clean.slice(0, -10);
+      if (/^\d{10}$/.test(numberPart) && /^\+\d{1,4}$/.test(codePart)) {
+        return { countryCode: codePart, number: numberPart };
+      }
+    }
+    const digitsOnly = clean.replace(/\D/g, '');
+    if (digitsOnly.length === 10) {
+      return { countryCode: '+91', number: digitsOnly };
+    }
+    return { countryCode: '+91', number: clean };
+  };
+
+  // Validate mobile numbers strictly by country:
+  // - must be exactly 10 digits
+  // - country-specific mobile prefixes (no landlines)
+  const validatePhone = (value: string, code: string): string => {
     if (!value || value.trim() === '') return ''; // optional field
     const digits = value.replace(/\D/g, '');
     if (digits.length === 0) return '';
     if (digits.length !== 10) return `Phone must be exactly 10 digits (entered: ${digits.length})`;
-    if (!/^[6-9]/.test(digits)) return 'Phone must start with 6, 7, 8, or 9';
+    
+    // Only block 0 if not allowed by local dial plans (e.g. Australia starting with 04 is valid, Saudi/UAE starting with 05 is valid)
+    if (digits.startsWith('0') && code !== '+61' && code !== '+966' && code !== '+971') {
+      return 'Phone number cannot start with 0';
+    }
+    
+    // Country specific mobile patterns
+    if (code === '+91') {
+      if (!/^[6-9]/ .test(digits)) return 'Indian mobile numbers must start with 6, 7, 8, or 9';
+    } else if (code === '+1') {
+      if (!/^[2-9]/ .test(digits)) return 'US/Canada numbers must start with a digit between 2 and 9';
+    } else if (code === '+44') {
+      if (!/^7/ .test(digits)) return 'UK mobile numbers must start with 7';
+    } else if (code === '+61') {
+      if (!/^(04|4)/ .test(digits)) return 'Australian mobile numbers must start with 04 or 4';
+    } else if (code === '+966' || code === '+971') {
+      if (!/^(05|5)/ .test(digits)) return 'Mobile numbers must start with 05 or 5';
+    }
+
     if (/^(.)\1{9}$/.test(digits)) return 'Phone cannot be all same digits (e.g. 9999999999)';
     return '';
   };
@@ -48,7 +105,9 @@ export default function ProfilePage() {
       setEmail(user.email || '');
       setBio(user.bio || '');
       setSpecialization(user.specialization || '');
-      setPhone(user.phone || '');
+      const parsed = parsePhone(user.phone || '');
+      setCountryCode(parsed.countryCode);
+      setPhone(parsed.number);
       setGender(user.gender || '');
     }
   }, [user]);
@@ -87,7 +146,7 @@ export default function ProfilePage() {
     // Phone validation (if provided)
     const trimmedPhone = phone.trim();
     if (trimmedPhone) {
-      const phoneValidationError = validatePhone(trimmedPhone);
+      const phoneValidationError = validatePhone(trimmedPhone, countryCode);
       if (phoneValidationError) {
         setPhoneError(phoneValidationError);
         showToast(phoneValidationError, 'error');
@@ -97,6 +156,7 @@ export default function ProfilePage() {
     setPhoneError('');
 
     const oldEmail = user.email;
+    const finalPhone = trimmedPhone ? `${countryCode} ${trimmedPhone}` : '';
 
     try {
       await updateProfile({
@@ -104,7 +164,7 @@ export default function ProfilePage() {
         email: email.trim(),
         bio: bio.trim(),
         specialization: specialization.trim(),
-        phone: phone.trim(),
+        phone: finalPhone,
         gender: gender,
       });
 
@@ -119,7 +179,7 @@ export default function ProfilePage() {
           email: email.trim(),
           bio: bio.trim(),
           specialization: specialization.trim(),
-          phone: phone.trim(),
+          phone: finalPhone,
           gender: gender,
         });
       }
@@ -341,41 +401,8 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
+                  {/* Row 2: Gender & Specialization side-by-side */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        Phone Number <span className="text-[10px] font-normal normal-case text-foreground/60">(optional, 10 digits)</span>
-                      </label>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => {
-                          // Only allow digits, max 10
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
-                          setPhone(val);
-                          setPhoneError(validatePhone(val));
-                        }}
-                        placeholder="e.g. 9876543210"
-                        maxLength={10}
-                        inputMode="numeric"
-                        className={`w-full h-10 px-3 border rounded-lg bg-secondary/30 text-sm focus:outline-hidden focus:ring-2 transition text-foreground ${
-                          phoneError
-                            ? 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500'
-                            : phone.length === 10 && !phoneError
-                            ? 'border-emerald-500 focus:ring-emerald-500/20 focus:border-emerald-500'
-                            : 'border-border focus:ring-primary/20 focus:border-primary'
-                        }`}
-                      />
-                      {phoneError && (
-                        <p className="text-[11px] font-semibold text-rose-500 mt-0.5 flex items-center gap-1">
-                          <span>⚠</span> {phoneError}
-                        </p>
-                      )}
-                      {!phoneError && phone.length === 10 && (
-                        <p className="text-[11px] font-semibold text-emerald-500 mt-0.5">✓ Valid phone number</p>
-                      )}
-                    </div>
-
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Gender</label>
                       <select
@@ -390,27 +417,125 @@ export default function ProfilePage() {
                         <option value="Prefer not to say">Prefer not to say</option>
                       </select>
                     </div>
+
+                    {user.role === 'admin' ? (
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Specialization</label>
+                        <input
+                          type="text"
+                          value={specialization}
+                          onChange={(e) => setSpecialization(e.target.value)}
+                          placeholder="e.g. Backend Architecture"
+                          className="w-full h-10 px-3 border border-border rounded-lg bg-secondary/30 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-foreground"
+                        />
+                      </div>
+                    ) : user.specialization ? (
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Specialization</label>
+                        <div className="flex h-10 items-center px-3 border border-border/50 rounded-lg bg-muted text-sm text-muted-foreground font-medium">
+                          {user.specialization}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
 
-                  {user.role === 'admin' ? (
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Specialization</label>
+                  {/* Row 3: Phone Number - moved to its own row below with max-w-md for professional styling */}
+                  <div className="space-y-1.5 max-w-md">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Phone Number <span className="text-[10px] font-normal normal-case text-foreground/60">(optional, 10 digits)</span>
+                    </label>
+                    <div className="flex gap-2 relative">
+                      {/* Custom Dropdown Trigger */}
+                      <div className="relative shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                          className={`w-28 h-10 px-3 border rounded-lg bg-secondary/30 text-sm flex items-center justify-between text-foreground cursor-pointer focus:outline-hidden focus:ring-2 transition ${
+                            phoneError
+                              ? 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500'
+                              : phone.length === 10 && !phoneError
+                              ? 'border-emerald-500 focus:ring-emerald-500/20 focus:border-emerald-500'
+                              : 'border-border focus:ring-primary/20 focus:border-primary'
+                          }`}
+                        >
+                          <span className="flex items-center gap-1.5">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={`https://flagcdn.com/w20/${countries.find(c => c.code === countryCode)?.iso || 'in'}.png`}
+                              width="20"
+                              height="15"
+                              alt=""
+                              className="object-contain rounded-xs"
+                            />
+                            <span className="font-medium text-foreground">{countryCode}</span>
+                          </span>
+                          <span className="text-[10px] text-muted-foreground/60">▼</span>
+                        </button>
+
+                        {isDropdownOpen && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-40 bg-transparent"
+                              onClick={() => setIsDropdownOpen(false)}
+                            />
+                            <div className="absolute top-11 left-0 z-50 w-56 max-h-60 overflow-y-auto border border-border rounded-lg bg-card shadow-lg py-1 transition-all duration-200">
+                              {countries.map((c) => (
+                                <button
+                                  key={`${c.code}-${c.name}`}
+                                  type="button"
+                                  onClick={() => {
+                                    setCountryCode(c.code);
+                                    setIsDropdownOpen(false);
+                                    setPhoneError(validatePhone(phone, c.code));
+                                  }}
+                                  className="w-full h-9 px-3 flex items-center gap-2 hover:bg-secondary/40 text-sm text-foreground transition text-left cursor-pointer"
+                                >
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={`https://flagcdn.com/w20/${c.iso}.png`}
+                                    width="20"
+                                    height="15"
+                                    alt=""
+                                    className="object-contain rounded-xs shrink-0"
+                                  />
+                                  <span className="font-medium">{c.code}</span>
+                                  <span className="text-[11px] text-muted-foreground truncate flex-1">({c.name})</span>
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
                       <input
-                        type="text"
-                        value={specialization}
-                        onChange={(e) => setSpecialization(e.target.value)}
-                        placeholder="e.g. Backend Architecture"
-                        className="w-full h-10 px-3 border border-border rounded-lg bg-secondary/30 text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary transition text-foreground"
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => {
+                          // Only allow digits, max 10
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setPhone(val);
+                          setPhoneError(validatePhone(val, countryCode));
+                        }}
+                        placeholder="e.g. 9876543210"
+                        maxLength={10}
+                        inputMode="numeric"
+                        className={`flex-1 h-10 px-3 border rounded-lg bg-secondary/30 text-sm focus:outline-hidden focus:ring-2 transition text-foreground ${phoneError
+                            ? 'border-rose-500 focus:ring-rose-500/20 focus:border-rose-500'
+                            : phone.length === 10 && !phoneError
+                              ? 'border-emerald-500 focus:ring-emerald-500/20 focus:border-emerald-500'
+                              : 'border-border focus:ring-primary/20 focus:border-primary'
+                          }`}
                       />
                     </div>
-                  ) : user.specialization ? (
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Specialization</label>
-                      <div className="flex h-10 items-center px-3 border border-border/50 rounded-lg bg-muted text-sm text-muted-foreground font-medium">
-                        {user.specialization}
-                      </div>
-                    </div>
-                  ) : null}
+                    {phoneError && (
+                      <p className="text-[11px] font-semibold text-rose-500 mt-0.5 flex items-center gap-1">
+                        <span>⚠</span> {phoneError}
+                      </p>
+                    )}
+                    {!phoneError && phone.length === 10 && (
+                      <p className="text-[11px] font-semibold text-emerald-500 mt-0.5">✓ Valid phone number</p>
+                    )}
+                  </div>
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
@@ -438,7 +563,10 @@ export default function ProfilePage() {
                         setEmail(user.email || '');
                         setBio(user.bio || '');
                         setSpecialization(user.specialization || '');
-                        setPhone(user.phone || '');
+                        const parsed = parsePhone(user.phone || '');
+                        setCountryCode(parsed.countryCode);
+                        setPhone(parsed.number);
+                        setPhoneError('');
                         setGender(user.gender || '');
                       }}
                       className="h-9 gap-1.5 text-xs rounded-lg"
